@@ -1,380 +1,392 @@
-<div align="center">
-
 # 🧩 Smart Job Board
 
-### La plateforme full-stack qui centralise recrutement et recherche d'emploi
+> A modern full-stack job board platform — centralizing job postings, application tracking, company profiles, and email notifications into a single application.
 
-[![Status](https://img.shields.io/badge/status-en%20d%C3%A9veloppement-yellow)]()
+[![Status](https://img.shields.io/badge/status-in%20development-yellow)]()
 [![License](https://img.shields.io/badge/license-MIT-blue)]()
-[![Node](https://img.shields.io/badge/node-%3E%3D18-green)]()
-[![NestJS](https://img.shields.io/badge/NestJS-11-E0234E?logo=nestjs)]()
-[![React](https://img.shields.io/badge/React-18-61DAFB?logo=react)]()
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?logo=postgresql)]()
-[![Docker](https://img.shields.io/badge/Docker-ready-2496ED?logo=docker)]()
-
-*Un ATS moderne et léger pour startups, PME et équipes tech — pensé pour remplacer la dispersion entre LinkedIn, Indeed et Glassdoor par une seule expérience cohérente.*
-
-[Contexte](#-contexte) • [Fonctionnalités](#-fonctionnalités) • [Architecture](#-architecture) • [Stack technique](#-stack-technique) • [Installation](#-installation--démarrage-rapide) • [API](#-api) • [Roadmap](#-roadmap--planning) • [Équipe](#-équipe)
-
-</div>
+[![Node](https://img.shields.io/badge/node-%3E%3D20-green)]()
+[![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=white)]()
+[![NestJS](https://img.shields.io/badge/NestJS-E0234E?logo=nestjs&logoColor=white)]()
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?logo=postgresql&logoColor=white)]()
 
 ---
 
-## 📖 Contexte
+## 📖 Table of Contents
 
-Les petites entreprises, startups et équipes de développement s'appuient aujourd'hui sur plusieurs outils disjoints (LinkedIn, Indeed, Glassdoor…) pour gérer leur recrutement. Résultat : friction pour les recruteurs comme pour les candidats, qui doivent naviguer entre plateformes non connectées pour publier, découvrir et postuler à des offres.
+- [Context](#-context)
+- [Project Goals](#-project-goals)
+- [Tech Stack](#-tech-stack)
+- [Architecture](#-architecture)
+- [User Roles](#-user-roles)
+- [Features](#-features)
+- [Repository Structure](#-repository-structure)
+- [Data Model Overview](#-data-model-overview)
+- [Installation & Setup](#-installation--setup)
+- [Environment Variables](#-environment-variables)
+- [API Documentation](#-api-documentation)
+- [Git Workflow & Collaboration](#-git-workflow--collaboration)
+- [Roadmap](#-roadmap)
+- [Deliverables](#-deliverables)
+- [Team](#-team)
+- [License](#-license)
 
-**Smart Job Board** centralise ces besoins dans une seule plateforme moderne : publication d'offres, suivi des candidatures, profils d'entreprise et notifications email — le tout pensé pour une expérience fluide côté employeur comme côté candidat.
+---
 
-## 🎯 Objectifs du projet
+## 🎯 Context
 
-- Permettre aux **employeurs** de publier et gérer leurs offres d'emploi
-- Permettre aux **candidats** de rechercher, filtrer et postuler facilement
-- Fournir des **mises à jour en temps quasi-réel** du statut des candidatures via email
-- Garantir une **authentification sécurisée** avec contrôle d'accès basé sur les rôles (RBAC)
-- Exposer une **API GraphQL** en complément du REST pour un data-fetching efficace
-- Mettre en place un **pipeline DevOps de production** dès le premier jour
+Small companies, startups, and tech teams currently juggle several disconnected tools (LinkedIn, Indeed, Glassdoor…) to manage hiring. **Smart Job Board** centralizes these needs into a single modern platform combining:
 
-> Ce projet sert également de **pièce de portfolio** solide pour les deux membres de l'équipe, en appliquant des pratiques full-stack modernes de bout en bout.
+- Job posting and management
+- Real-time application tracking
+- Company profiles
+- Automated email notifications
 
-## 👥 Public cible
+## 🎯 Project Goals
 
-| Segment | Besoin |
+- ✅ Enable employers to post and manage job listings
+- ✅ Enable job seekers to browse, filter, and apply for positions
+- ✅ Real-time application status updates via email notifications
+- ✅ Secure authentication with role-based access control (RBAC)
+- ✅ A GraphQL API alongside REST for efficient data fetching
+- ✅ A production-grade DevOps pipeline from day one
+
+This project also serves as a **technical portfolio piece** for both team members.
+
+---
+
+## 🛠 Tech Stack
+
+| Domain | Technologies |
 |---|---|
-| 🚀 Startups & entreprises en croissance | Recruter sans gros budget RH |
-| 🏢 PME | Alternative légère aux ATS coûteux |
-| 💻 Équipes tech | Filtres par compétences pour rôles techniques |
-| 🧑‍💻 Freelances / indépendants | Missions ponctuelles |
-| 🎓 Étudiants & juniors | Entrée sur le marché du travail |
-| 📋 Recruteurs / hiring managers | Suivi de pipeline de candidats |
-
----
-
-## ✨ Fonctionnalités
-
-### 👑 Admin — Administration de la plateforme
-- Gestion de tous les utilisateurs et comptes
-- Approbation ou suspension des comptes entreprise
-- Suppression de n'importe quelle offre
-- Statistiques globales de la plateforme
-- Configuration de la plateforme
-
-### 🏢 Employeur — Côté recrutement
-- Création et gestion d'un profil entreprise
-- Publication, édition et clôture d'offres d'emploi
-- Visualisation et gestion des candidats par offre
-- Mise à jour du statut de candidature (`pending → reviewed → accepted / rejected`)
-- Alertes email à chaque nouvelle candidature
-
-### 👤 Candidat — Côté recherche d'emploi
-- Parcours et recherche d'offres (sans compte requis)
-- Inscription et complétion d'un profil personnel
-- Candidature avec upload de CV et lettre de motivation
-- Suivi des statuts de candidature depuis un tableau de bord personnel
-- Sauvegarde d'offres et alertes de recherche personnalisées
-- Notifications email lors des changements de statut
-
-### 🌐 Public (non authentifié)
-- Parcours et filtrage des offres publiques
-- Consultation des pages détail offre / entreprise
-- Inscription ou connexion pour postuler
-
----
-
-## 🏗️ Architecture
-
-```
-┌─────────────────────────────────────────────────────────────────────┐
-│                              CLIENT (Web)                            │
-│   React 18 + TypeScript + Vite + TailwindCSS                        │
-│   Apollo Client (GraphQL)  •  TanStack Query (REST)                 │
-│   React Hook Form + Zod (validation)                                 │
-└───────────────────────────────┬───────────────────────────────────┘
-                                 │ HTTPS (REST + GraphQL)
-┌───────────────────────────────▼───────────────────────────────────┐
-│                    API (NestJS - Modular Clean Architecture)         │
-│  ┌───────────┐ ┌───────────┐ ┌────────────┐ ┌──────────────────┐   │
-│  │   Auth    │ │  Users    │ │ Companies  │ │       Jobs       │   │
-│  │ JWT+Guard │ │  module   │ │   module   │ │  CRUD + filtres  │   │
-│  └───────────┘ └───────────┘ └────────────┘ └──────────────────┘   │
-│  ┌────────────────────┐ ┌────────────────────────────────────────┐ │
-│  │  Applications      │ │  GraphQL Layer (Apollo, code-first)    │ │
-│  │  module            │ │  JobResolver + UserResolver + DataLoader│ │
-│  └────────────────────┘ └────────────────────────────────────────┘ │
-│  Swagger /api/docs  •  Rate limiting  •  Helmet  •  CORS  •  Health │
-└───────┬───────────────────────┬───────────────────────┬───────────┘
-        │ Prisma ORM            │ BullMQ (queue)         │ Multer
-┌───────▼─────────┐   ┌─────────▼──────────┐   ┌─────────▼─────────┐
-│   PostgreSQL     │   │ Redis + Nodemailer  │   │  Cloudflare R2     │
-│   (base de       │   │ Emails: candidature │   │  Stockage fichiers │
-│   données)       │   │ reçue, changement   │   │  (CV, logos...)    │
-│                  │   │ de statut, digest   │   │                    │
-└──────────────────┘   └─────────────────────┘   └────────────────────┘
-```
-
-**Principes d'architecture**
-- **Clean Architecture / NestJS modulaire** : séparation stricte modules / services / repositories
-- **REST + GraphQL en parallèle** : REST pour les opérations simples (mutations CRUD), GraphQL pour les vues composites avec DataLoader (évite le N+1)
-- **Découplage via file d'attente** : les emails ne bloquent jamais la requête HTTP (BullMQ + Redis)
-- **Deux dépôts séparés** (`job-board-api` / `job-board-web`) pour un cycle de déploiement indépendant
-
----
-
-## 🛠️ Stack technique
-
-| Domaine | Technologies |
-|---|---|
+| **Architecture** | Clean Architecture / Modular NestJS |
 | **Frontend** | React 18 + TypeScript + Vite |
 | **Backend** | NestJS + TypeScript |
 | **API** | REST + GraphQL (Apollo, code-first) |
-| **Authentification** | JWT + Passport.js (access + refresh tokens) |
-| **Temps réel / files d'attente** | BullMQ + Redis (queue email) |
-| **Base de données** | PostgreSQL |
+| **Authentication** | JWT + Passport.js (access + refresh tokens) |
+| **Real-time / Queue** | BullMQ + Redis (email queue) |
+| **Database** | PostgreSQL |
 | **ORM** | Prisma |
-| **Stockage fichiers** | Multer + Cloudflare R2 |
+| **File Storage** | Multer + Cloudflare R2 |
 | **Versioning** | Git + GitHub (feature branch workflow) |
-| **Conteneurisation** | Docker + Docker Compose |
+| **Containerization** | Docker + Docker Compose |
 | **CI/CD** | GitHub Actions |
 | **Documentation** | Swagger / OpenAPI + README |
-| **Déploiement** | Railway (API) • Vercel (frontend) |
+| **Deployment** | Railway (API) + Vercel (Web) |
 
 ---
 
-## 📁 Structure du projet (prévisionnelle)
+## 🏗 Architecture
+
+```
+                        ┌─────────────────────┐
+                        │   Client (React)    │
+                        │  Apollo + TanStack   │
+                        └──────────┬───────────┘
+                                   │ REST / GraphQL
+                        ┌──────────▼───────────┐
+                        │     NestJS API        │
+                        │  Modular / Clean Arch │
+                        ├───────────────────────┤
+                        │ Auth │ Users │ Jobs   │
+                        │ Companies │ Apps      │
+                        │ GraphQL Layer (DL)    │
+                        └──────┬─────────┬──────┘
+                               │         │
+                 ┌─────────────▼──┐   ┌──▼───────────────┐
+                 │  PostgreSQL     │   │  Redis + BullMQ  │
+                 │  (via Prisma)   │   │  (email queue)   │
+                 └─────────────────┘   └──────────────────┘
+                                              │
+                                       ┌──────▼───────┐
+                                       │  Nodemailer  │
+                                       │  (SMTP)      │
+                                       └──────────────┘
+
+                 ┌──────────────────────────┐
+                 │  Cloudflare R2 (files)    │
+                 │  Resumes, logos, avatars  │
+                 └──────────────────────────┘
+```
+
+**Key principles:**
+- Strict layer separation (controllers → services → repositories via Prisma)
+- DataLoader on the GraphQL side to avoid N+1 query issues
+- Asynchronous queues for all email processing (non-blocking)
+- Two separate repositories (`job-board-api`, `job-board-web`) for full decoupling
+
+---
+
+## 👥 User Roles
+
+| Role | Icon | Description |
+|---|---|---|
+| **Admin** | 👑 | Global administration: manage accounts, approve/suspend companies, delete listings, view stats, manage platform config |
+| **Employer** | 🏢 | Create company profile, post/manage job listings, manage applicants, update application statuses |
+| **Job Seeker** | 👤 | Candidate profile, apply with resume/cover letter, track status, saved jobs, alerts |
+| **Public** | 🌐 | Read-only access: browse/filter listings, view job and company detail pages |
+
+---
+
+## ⚙️ Features
+
+### Backend (NestJS)
+
+- **Auth module**: register, login, refresh token, JWT guard, RolesGuard
+- **Users module**: profile management, avatar upload
+- **Companies module**: CRUD, logo upload
+- **Jobs module**: CRUD, advanced filtering, pagination, tags
+- **Applications module**: apply, withdraw, status updates, resume upload
+- **GraphQL layer**: `JobResolver` + `UserResolver` with DataLoader (no N+1)
+- **Email queue**: BullMQ + Redis + Nodemailer (application received, status change, daily digest)
+- **Cron jobs**: auto-close expired listings, saved-search digest
+- **Swagger**: full documentation at `/api/docs`
+- **Security**: rate limiting, Helmet, CORS, health checks
+- **DevOps**: Docker Compose (api + postgres + redis), GitHub Actions CI/CD, Railway deployment
+
+### Frontend (React)
+
+- Public job listing page: search, filters, pagination
+- Job detail page + apply flow (resume upload modal)
+- Auth pages: register/login with role selection
+- Job seeker dashboard: my applications, saved jobs, notifications
+- Employer dashboard: post job, manage listings, applicant list, status updates
+- Company profile page
+- Admin panel: users list, companies list, stats overview
+- Apollo Client (GraphQL) + TanStack Query (REST)
+- React Hook Form + Zod for all forms
+- Responsive design with TailwindCSS
+- Vercel deployment with environment-based API URL
+
+---
+
+## 📂 Repository Structure
 
 ```
 job-board-api/
 ├── src/
-│   ├── auth/                  # register, login, refresh, JWT guard, RolesGuard
-│   ├── users/                 # profil, avatar
-│   ├── companies/             # CRUD, logo
-│   ├── jobs/                  # CRUD, filtres avancés, pagination, tags
-│   ├── applications/          # candidature, retrait, statuts, CV
-│   ├── graphql/                # JobResolver, UserResolver, DataLoader
-│   ├── email/                  # BullMQ + Nodemailer (templates)
-│   ├── cron/                   # clôture auto des offres expirées, digest
-│   ├── common/                 # guards, interceptors, filters, decorators
+│   ├── auth/
+│   ├── users/
+│   ├── companies/
+│   ├── jobs/
+│   ├── applications/
+│   ├── graphql/
+│   │   ├── resolvers/
+│   │   └── dataloaders/
+│   ├── queue/
+│   │   └── email/
+│   ├── common/
+│   │   ├── guards/
+│   │   ├── decorators/
+│   │   └── filters/
 │   └── main.ts
 ├── prisma/
 │   ├── schema.prisma
 │   └── migrations/
 ├── docker-compose.yml
+├── Dockerfile
 ├── .github/workflows/ci.yml
 └── README.md
 
 job-board-web/
 ├── src/
-│   ├── pages/                  # listing public, détail offre, dashboards
+│   ├── pages/
 │   ├── components/
-│   ├── features/               # auth, jobs, applications, companies, admin
-│   ├── graphql/                # queries/mutations Apollo
-│   ├── lib/                    # TanStack Query, Zod schemas
-│   └── main.tsx
-├── vercel.json
+│   ├── features/
+│   │   ├── jobs/
+│   │   ├── applications/
+│   │   ├── auth/
+│   │   └── admin/
+│   ├── graphql/
+│   ├── lib/
+│   │   ├── apolloClient.ts
+│   │   └── queryClient.ts
+│   ├── hooks/
+│   └── App.tsx
+├── vite.config.ts
+├── tailwind.config.ts
 └── README.md
 ```
 
 ---
 
-## 🚀 Installation & démarrage rapide
+## 🗄 Data Model Overview
 
-> ⚠️ Le code n'est pas encore initialisé — cette section décrit le workflow cible une fois le scaffold en place (Phase 1).
+```
+User (id, email, password, role, createdAt)
+ └── Profile (avatar, bio, resumeUrl)
 
-### Prérequis
-- Node.js ≥ 18
+Company (id, name, logoUrl, description, ownerId → User)
+
+Job (id, title, description, tags[], location, status, companyId → Company, closesAt)
+
+Application (id, status[pending|reviewed|accepted|rejected], resumeUrl, coverLetter, jobId → Job, userId → User)
+
+SavedJob (id, userId → User, jobId → Job)
+SavedSearch (id, userId → User, filters JSON)
+```
+
+> The detailed schema will be defined via **Prisma** (`prisma/schema.prisma`) in Phase 1.
+
+---
+
+## 🚀 Installation & Setup
+
+### Prerequisites
+
+- Node.js ≥ 20
 - Docker & Docker Compose
-- pnpm (ou npm/yarn)
-- Un compte Cloudflare R2 (stockage fichiers)
+- pnpm (recommended) or npm/yarn
 
-### 1. Cloner les dépôts
+### Backend (`job-board-api`)
+
 ```bash
 git clone https://github.com/<org>/job-board-api.git
-git clone https://github.com/<org>/job-board-web.git
-```
-
-### 2. Backend — `job-board-api`
-```bash
 cd job-board-api
-cp .env.example .env          # configurer DATABASE_URL, JWT_SECRET, REDIS_URL, R2_*
+cp .env.example .env
 pnpm install
-docker compose up -d          # lance postgres + redis
+
+# Start PostgreSQL + Redis via Docker
+docker compose up -d postgres redis
+
+# Run Prisma migrations
 pnpm prisma migrate dev
-pnpm run start:dev            # API disponible sur http://localhost:3000
-```
-📄 Documentation Swagger : `http://localhost:3000/api/docs`
 
-### 3. Frontend — `job-board-web`
+# Start the API in dev mode
+pnpm start:dev
+```
+
+API available at `http://localhost:3000`
+Swagger docs: `http://localhost:3000/api/docs`
+GraphQL Playground: `http://localhost:3000/graphql`
+
+### Frontend (`job-board-web`)
+
 ```bash
+git clone https://github.com/<org>/job-board-web.git
 cd job-board-web
-cp .env.example .env          # VITE_API_URL, VITE_GRAPHQL_URL
+cp .env.example .env
 pnpm install
-pnpm run dev                  # App disponible sur http://localhost:5173
+pnpm dev
 ```
 
-### 4. Variables d'environnement principales
+Frontend available at `http://localhost:5173`
 
-| Variable | Description |
-|---|---|
-| `DATABASE_URL` | Chaîne de connexion PostgreSQL |
-| `REDIS_URL` | Connexion Redis pour BullMQ |
-| `JWT_ACCESS_SECRET` / `JWT_REFRESH_SECRET` | Secrets JWT |
-| `R2_ACCESS_KEY_ID` / `R2_SECRET_ACCESS_KEY` / `R2_BUCKET` | Stockage Cloudflare R2 |
-| `SMTP_HOST` / `SMTP_USER` / `SMTP_PASS` | Envoi d'emails (Nodemailer) |
-| `VITE_API_URL` | URL de l'API REST côté frontend |
-| `VITE_GRAPHQL_URL` | URL de l'endpoint GraphQL |
+### Run the full stack with Docker Compose
 
----
-
-## 🔌 API
-
-### REST — endpoints principaux (prévisionnels)
-
-| Méthode | Endpoint | Description | Rôle requis |
-|---|---|---|---|
-| `POST` | `/auth/register` | Inscription | Public |
-| `POST` | `/auth/login` | Connexion | Public |
-| `POST` | `/auth/refresh` | Rafraîchissement du token | Authentifié |
-| `GET` | `/jobs` | Liste des offres (filtres, pagination) | Public |
-| `POST` | `/jobs` | Création d'une offre | Employeur |
-| `PATCH` | `/jobs/:id` | Édition d'une offre | Employeur |
-| `POST` | `/applications` | Postuler à une offre | Candidat |
-| `PATCH` | `/applications/:id/status` | Mise à jour du statut | Employeur |
-| `GET` | `/companies/:id` | Détail entreprise | Public |
-| `GET` | `/admin/stats` | Statistiques plateforme | Admin |
-
-📄 **Source de vérité** : Swagger UI (`/api/docs`) — toute rupture de contrat de réponse doit être discutée avant implémentation (voir [Règles d'équipe](#-règles-de-collaboration-déquipe)).
-
-### GraphQL — exemple de requête
-
-```graphql
-query JobsWithCompany {
-  jobs(filter: { tags: ["nestjs", "react"] }, pagination: { page: 1, limit: 10 }) {
-    items {
-      id
-      title
-      location
-      company {
-        id
-        name
-        logoUrl
-      }
-    }
-    totalCount
-  }
-}
+```bash
+docker compose up --build
 ```
 
-Résolu via `JobResolver` avec **DataLoader** pour batcher les appels `company` et éviter le problème N+1.
+---
+
+## 🔐 Environment Variables
+
+**API (`.env`)**
+
+```env
+DATABASE_URL=postgresql://user:password@localhost:5432/jobboard
+REDIS_URL=redis://localhost:6379
+JWT_ACCESS_SECRET=change_me
+JWT_REFRESH_SECRET=change_me
+JWT_ACCESS_EXPIRES=15m
+JWT_REFRESH_EXPIRES=7d
+SMTP_HOST=smtp.example.com
+SMTP_PORT=587
+SMTP_USER=your_smtp_user
+SMTP_PASS=your_smtp_pass
+CLOUDFLARE_R2_BUCKET=job-board-uploads
+CLOUDFLARE_R2_ACCESS_KEY=xxx
+CLOUDFLARE_R2_SECRET_KEY=xxx
+PORT=3000
+```
+
+**Web (`.env`)**
+
+```env
+VITE_API_URL=http://localhost:3000
+VITE_GRAPHQL_URL=http://localhost:3000/graphql
+```
 
 ---
 
-## 🎨 Design & UI
+## 📑 API Documentation
 
-> Design system prévu, à formaliser en Phase 1 (Figma ou équivalent) avant l'implémentation frontend.
-
-**Principes directeurs**
-- **Sobre et professionnel** : palette neutre (gris ardoise / bleu profond) + un accent unique pour les CTA
-- **TailwindCSS** comme unique système de style, sans surcouche CSS custom
-- **Responsive-first** : mobile → tablette → desktop, breakpoints Tailwind standards
-- **Accessibilité** : contrastes AA minimum, navigation clavier sur les formulaires et modales
-
-**Pages clés (frontend — Samira)**
-- Page publique de listing (recherche, filtres, pagination)
-- Page détail offre + flux de candidature (modal upload CV)
-- Pages auth : inscription + connexion avec sélection de rôle
-- Dashboard candidat : mes candidatures, offres sauvegardées, notifications
-- Dashboard employeur : publier une offre, gérer les listings, liste candidats, statuts
-- Page profil entreprise
-- Panel admin : liste utilisateurs, liste entreprises, vue statistiques
-
-**Composants transverses**
-- Formulaires standardisés via **React Hook Form + Zod**
-- États de chargement / erreur cohérents (skeletons, toasts)
-- Composant de filtre réutilisable (jobs, admin, dashboards)
+- **Swagger UI**: `/api/docs` — source of truth for all REST endpoints
+- **GraphQL Playground**: `/graphql` — introspectable schema, documented queries/mutations
+- Any breaking change to a response shape must be discussed before implementation (see collaboration rules)
 
 ---
 
-## 🗺️ Roadmap / Planning
+## 🔀 Git Workflow & Collaboration
 
-| Phase | Durée | Contenu |
+**Repositories**: two separate repos — `job-board-api` (Mohamed) and `job-board-web` (Samira)
+
+**Branch strategy**
+```
+main → dev → feature/<feature-name>
+```
+- ❌ No direct pushes to `main` or `dev`
+- ✅ All changes go through a Pull Request
+- ✅ Conventional commits: `feat:`, `fix:`, `chore:`, `docs:`
+
+**API contract**
+- Swagger UI (`/api/docs`) is the source of truth for all endpoints
+- Frontend mocks API responses locally during backend development to stay unblocked
+- API contract review meetings at the end of Week 2 and Week 4
+
+**Communication**
+- Daily async standup: what I did / what I'm doing / any blockers
+- Weekly sync call to align on the next sprint
+- Tasks tracked in Notion / Linear — no undocumented work
+
+---
+
+## 🗺 Roadmap
+
+| Phase | Content | Duration |
 |---|---|---|
-| **Phase 1 — Fondations** | Semaines 1–2 | Scaffold, config, schéma Prisma, auth, layout de base |
-| **Phase 2 — Fonctionnalités cœur** | Semaines 3–4 | Jobs, candidatures, entreprises, dashboard employeur |
-| **Phase 3 — GraphQL & temps réel** | Semaines 5–6 | Couche GraphQL, queue email BullMQ, cron jobs, offres sauvegardées |
-| **Phase 4 — DevOps & QA** | Semaines 7–8 | DevOps, tests, QA, README, déploiement live |
-
-```mermaid
-gantt
-    title Smart Job Board — Planning (8 semaines)
-    dateFormat  YYYY-MM-DD
-    section Phase 1
-    Fondations           :p1, 2026-08-03, 14d
-    section Phase 2
-    Fonctionnalités cœur :p2, after p1, 14d
-    section Phase 3
-    GraphQL & temps réel :p3, after p2, 14d
-    section Phase 4
-    DevOps & QA          :p4, after p3, 14d
-```
+| **Phase 1 — Foundation** | Scaffolding, config, Prisma schema, auth, layout shell | Weeks 1–2 |
+| **Phase 2 — Core Features** | Jobs, applications, companies, employer dashboard | Weeks 3–4 |
+| **Phase 3 — GraphQL & Async** | GraphQL layer, BullMQ email queue, cron jobs, saved jobs | Weeks 5–6 |
+| **Phase 4 — DevOps & QA** | Testing, QA, README, live deployment | Weeks 7–8 |
 
 ---
 
-## 📦 Livrables
+## 📦 Deliverables
 
-| Livrable | Responsable |
+| Deliverable | Owner |
 |---|---|
-| API REST + GraphQL (NestJS) | Mohamed |
-| Schéma PostgreSQL + migrations Prisma | Mohamed |
-| Système de notifications email (BullMQ) | Mohamed |
-| Documentation Swagger / OpenAPI | Mohamed |
-| Pipeline Docker Compose + GitHub Actions | Mohamed |
-| Frontend React (toutes les pages) | Samira |
-| UI responsive avec TailwindCSS | Samira |
-| Intégration Apollo Client + TanStack Query | Samira |
-| Validation de formulaires (React Hook Form + Zod) | Samira |
-| Revue du contrat API + tests QA | Les deux |
-| README (repo API + repo web) | Les deux |
-| Diagramme d'architecture | Mohamed |
-| Déploiement live (démo) | Les deux |
+| REST + GraphQL API (NestJS) | Mohamed |
+| PostgreSQL schema + Prisma migrations | Mohamed |
+| Email notification system (BullMQ) | Mohamed |
+| Swagger / OpenAPI documentation | Mohamed |
+| Docker Compose + GitHub Actions pipeline | Mohamed |
+| React frontend (all pages) | Samira |
+| Responsive UI with TailwindCSS | Samira |
+| Apollo Client + TanStack Query integration | Samira |
+| Form validation (React Hook Form + Zod) | Samira |
+| API contract review + QA testing | Both |
+| README (API repo + Web repo) | Both |
+| Architecture diagram | Mohamed |
+| Live demo deployment | Both |
 
 ---
 
-## 🤝 Règles de collaboration d'équipe
+## 👨‍💻 Team
 
-### Workflow Git
-- Deux dépôts : `job-board-api` (Mohamed) et `job-board-web` (Samira)
-- Stratégie de branches : `main → dev → feature/<nom>`
-- Aucun push direct sur `main` ou `dev` — tout passe par Pull Request
-- Commits conventionnels : `feat:`, `fix:`, `chore:`, `docs:`
-
-### Contrat API
-- Swagger UI (`/api/docs`) fait office de source de vérité pour tous les endpoints
-- Toute rupture de contrat de réponse doit être discutée **avant** implémentation
-- Le frontend mocke les réponses API en local pendant le développement backend, pour ne jamais être bloqué
-- Réunion de revue du contrat API en fin de Semaine 2 et Semaine 4
-
-### Communication
-- Standup asynchrone quotidien : *ce que j'ai fait / ce que je fais / mes blocages*
-- Point hebdomadaire en visio : revue d'avancement, alignement sur le sprint suivant
-- Tâches suivies sur Notion / Linear — aucun travail non documenté
+| Member | Role |
+|---|---|
+| **Mohamed Ait Tajante** | Backend Developer • DevOps Engineer |
+| **Samira Aboutarik** | Frontend Developer • UI/UX Designer |
 
 ---
 
-## 👥 Équipe
+## 📄 License
 
-| | Nom | Rôle |
-|---|---|---|
-| 🛠️ | **Mohamed Ait Tajante** | Backend Developer • DevOps Engineer |
-| 🎨 | **Samira Aboutarik** | Frontend Developer • UI/UX Designer |
+This project is licensed under the **MIT License** — see the `LICENSE` file for details.
 
 ---
 
-## 📄 Licence
-
-Ce projet est distribué sous licence **MIT**. Voir le fichier `LICENSE` pour plus de détails.
-
-<div align="center">
-
-*Smart Job Board — Technical Specifications • 2026*
-
-</div>
+<p align="center">
+  <sub>Smart Job Board • Technical Specifications • 2026</sub>
+</p>
