@@ -1,0 +1,60 @@
+@import "tailwindcss";
+
+@theme {
+  /* Couleur principale de la marque — Indigo/Violet */
+  --color-primary-50: #EEF2FF;
+  --color-primary-100: #E0E7FF;
+  --color-primary-200: #C7D2FE;
+  --color-primary-300: #A5B4FC;
+  --color-primary-400: #818CF8;
+  --color-primary-500: #6366F1;
+  --color-primary-600: #4F46E5;
+  --color-primary-700: #4338CA;
+  --color-primary-800: #3730A3;
+  --color-primary-900: #312E81;
+
+  /* Neutres / fonds */
+  --color-surface: #FFFFFF;
+  --color-surface-subtle: #FAFAFA;
+  --color-surface-muted: #F3F4F6;
+  --color-surface-border: #E5E7EB;
+
+  /* Texte */
+  --color-ink: #111827;
+  --color-ink-muted: #6B7280;
+  --color-ink-faint: #9CA3AF;
+
+  /* Statuts de candidature (badges) */
+  --color-status-pending-bg: #F3F4F6;
+  --color-status-pending-text: #4B5563;
+  --color-status-reviewed-bg: #DBEAFE;
+  --color-status-reviewed-text: #1D4ED8;
+  --color-status-accepted-bg: #D1FAE5;
+  --color-status-accepted-text: #047857;
+  --color-status-rejected-bg: #FEE2E2;
+  --color-status-rejected-text: #B91C1C;
+
+  /* Panel admin (thème plus sombre et distinct) */
+  --color-admin-bg: #111827;
+  --color-admin-surface: #1F2937;
+  --color-admin-border: #374151;
+
+  --color-danger: #DC2626;
+  --color-danger-hover: #B91C1C;
+
+  /* Typographie */
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+
+  /* Radius */
+  --radius-sm: 6px;
+  --radius-DEFAULT: 8px;
+  --radius-md: 10px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+}
+
+body {
+  font-family: var(--font-sans);
+  color: var(--color-ink);
+  background-color: var(--color-surface-subtle);
+}
