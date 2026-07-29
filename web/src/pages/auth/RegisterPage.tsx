@@ -1,3 +1,0 @@
-export default function RegisterPage() {
-  return <div className="p-6">RegisterPage — à construire</div>;
-}
