@@ -1,33 +1,42 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { CreateUserDto } from './dto/create-user.dto';
 import bcrypt      from 'bcrypt';
+
+interface User {
+    id: string
+    email: string
+    passwordHash: string
+    fullName: string
+    createdAt: Date
+    updatedAt: Date
+}
+
+export interface   SignUpUser {
+    fullName: string
+    email: string
+    password: string
+}
 
 @Injectable()
 export class UsersService {
     constructor(private readonly prisma: PrismaService) {}
-
-    // create user (Sign-Up)
-    // async create(payload: CreateUserDto) {
-    //     const   isExist = await this.prisma.user.findUnique({
-    //         where: { email: payload.email }
-    //     });
-    //     if(isExist) {
-    //         throw new ConflictException('Email already exists');
-    //     }
-    //     const   hash = await this.encryptPassword(payload.password, 10);
-
-    //     return this.prisma.user.create({
-    //         data:
-    //         {
-    //             firstName: payload.firstName,
-    //             lastName: payload.lastName,
-    //             email: payload.email, 
-    //             passwordHash: hash
-    //         },
-    //         select: { email: true, id: true }
-    //     })
-    // }
+/*******    *********** ******** */
+    async findUserByEmail(email: string) : Promise<User | null> {
+        console.log("Email from user service: ", email);
+        return await this.prisma.user.findUnique({
+            where: { email: email }
+        });
+    }
+/*******    *********** ******** */
+    async create(credentials: SignUpUser) {
+        await this.prisma.user.create({
+            data: {
+                email: credentials.email,
+                fullName: credentials.fullName,
+                passwordHash: credentials.password
+            }
+        });
+    }
     // Get All users
     // async findAll() {
     //     return this.prisma.user.findMany({
