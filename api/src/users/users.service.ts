@@ -1,6 +1,7 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import bcrypt      from 'bcrypt';
+import { RefreshToken } from '@prisma/client';
 
 interface User {
     id: string
@@ -25,6 +26,13 @@ export class UsersService {
         console.log("Email from user service: ", email);
         return await this.prisma.user.findUnique({
             where: { email: email }
+        });
+    }
+/*******    *********** ******** */
+    async findUserById(userId: string) : Promise<User& {refreshTokens: RefreshToken[]} | null> {
+        return await this.prisma.user.findUnique({
+            where: { id: userId },
+            include: {refreshTokens: true}
         });
     }
 /*******    *********** ******** */

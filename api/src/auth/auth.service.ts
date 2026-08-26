@@ -8,7 +8,9 @@ import { PrismaService } from 'src/prisma/prisma.service';
 type AuthInput = {email: string, password: string};
 type AuthResult = {accessToken: string, refreshToken: string, user: User};
 type Validated = {userId: string, email: string };
+type GenerateTokensResult = { accessToken: string, refreshToken: string };
 type User = { userId: string, email: string };
+
 
 @Injectable()
 export class AuthService {
@@ -29,19 +31,28 @@ export class AuthService {
         if(!user) {
             throw new UnauthorizedException();
         }
-        const   accessToken = this.jwtService.sign(user, {
-            secret: this.confgService.getOrThrow<string>('ACCESS_SECRET'),
-            expiresIn: Number(this.confgService.getOrThrow<string>('JWT_ACCESS_EXPIRES_IN'))
-        });
-        const   refreshToken = this.jwtService.sign(user, {
-            expiresIn: Number(this.confgService.getOrThrow<string>('JWT_REFRESH_EXPIRES_IN')),
-            secret: this.confgService.getOrThrow<string>('REFRESH_SECRET')
-        })
+        const   { accessToken, refreshToken } = await this.generateTokens(user.userId);
         // Stoore the hashed refresh-token in DB 
         await this.storeRefreshToken({ refreshToken: refreshToken, userId: user.userId });
         return {
             user: { userId: user.userId, email: user.email },
             accessToken: accessToken,
+            refreshToken: refreshToken
+        }
+    }
+/*******    *********** ******** */
+    async   generateTokens(sub: string) : Promise<GenerateTokensResult> {
+        const   accesToken = this.jwtService.sign({ sub: sub, type: 'access' }, {
+            secret: this.confgService.getOrThrow<string>('ACCESS_SECRET'),
+            expiresIn: Number(this.confgService.getOrThrow<string>('JWT_ACCESS_EXPIRES_IN'))
+        });
+
+        const   refreshToken = this.jwtService.sign({ sub: sub, type: 'refresh' }, {
+            expiresIn: Number(this.confgService.getOrThrow<string>('JWT_REFRESH_EXPIRES_IN')),
+            secret: this.confgService.getOrThrow<string>('REFRESH_SECRET')
+        });
+        return {
+            accessToken: accesToken,
             refreshToken: refreshToken
         }
     }
@@ -85,5 +96,20 @@ export class AuthService {
         await this.userService.create({...input, password: hashPassword});
         console.log("----------> USER CREATED -------------");
     }
+/*******    *********** ******** */
+/*******    *********** ******** */
+/**         REFRESH PART         */
+/*******    *********** ******** */
+    async refresh(refreshPayload: { userId: string, refreshTokenId: string }) {
+        const   revokOldToken = await this.prisma.refreshToken.update({
+            where: { id: refreshPayload.refreshTokenId },
+            data: { revoked: true,  }
+        });
 
+        const   { accessToken, refreshToken } = await this.generateTokens(refreshPayload.userId);
+        return {
+            accessToken: accessToken,
+            refreshToken: refreshToken
+        }
+    }
 }

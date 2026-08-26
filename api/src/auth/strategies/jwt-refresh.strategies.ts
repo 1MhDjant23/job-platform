@@ -1,19 +1,51 @@
-import  { Injectable }  from    '@nestjs/common';
+import  { Injectable, UnauthorizedException }  from    '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
+import type { Request } from 'express';
+import { UsersService } from 'src/users/users.service';
+import bcrypt   from    'bcrypt';
 
 
-// @Injectable()
-// export  class   JwtRefreshStrategy  extends PassportStrategy(Strategy, 'jwt-refresh') {
-//     constructor(
-//         private readonly confgService: ConfigService
-//     ) {
-//         super({
-//             secretOrKey: confgService.get<string>('REFRESH_SECRET') ?? "to fix in the next"
-//         });
-//     }
-//     async   validate(paylod: string) {
-
-//     }
-// }
+@Injectable()
+export  class   JwtRefreshStrategy  extends PassportStrategy(Strategy, 'refreshToken') {
+    constructor(
+        private readonly confgService: ConfigService,
+        private readonly usersService: UsersService
+    ) {
+        super({
+            jwtFromRequest: ExtractJwt.fromExtractors([
+                (req: Request) => req?.cookies?.refreshToken,
+            ]),
+            secretOrKey: confgService.getOrThrow<string>('REFRESH_SECRET'),
+            passReqToCallback: true,
+            ignoreExpiration: false
+        });
+    }
+    async   validate(req: Request, paylod: { sub: string, type: string }) {
+        const   refreshToken = req.cookies.refreshToken;
+        const   user = await this.usersService.findUserById(paylod.sub);
+        if(!user || user.refreshTokens.length === 0) {
+            throw new UnauthorizedException();
+        }
+        let   matchedToken = null;
+        for(const token of user.refreshTokens) {
+            const   isMatch = await bcrypt.compare(refreshToken, token.hashedRefresh);
+            if(isMatch) {
+                matchedToken = token;
+                break ;
+            }
+        }
+        if(!matchedToken || matchedToken.revoked) {
+            throw new UnauthorizedException();
+        }
+        return {
+            userId: user.id,
+            refreshTokenId: matchedToken.id
+        };
+        //  (await Promise.all(user.refreshTokens.map(async(token) => {
+        //     const   isMatch = await bcrypt.compare(refreshToken, token.hashedRefresh);
+        //     return isMatch ? token : null;
+        // }))).find(t => t !== null);
+    }
+}
