@@ -56,8 +56,9 @@ export class AuthController {
 /*******    *********** ******** */
     @Get('refresh')
     @UseGuards(JwtRefreshGuard)
-    async getRefreshToken(@Req() req: RefreshRequest, @Res() res: Response) {
+    async getRefreshToken(@Req() req: RefreshRequest, @Res({ passthrough: true }) res: Response) {
         const   { accessToken, refreshToken } = await this.authService.refresh(req.user)
+        
         res.cookie('refreshToken', refreshToken, {
             httpOnly: true,
             sameSite: true,

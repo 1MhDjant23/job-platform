@@ -29,7 +29,7 @@ export class AuthService {
     async authenticate(input: AuthInput) : Promise<AuthResult> {
         const   user = await this.validateUser(input);
         if(!user) {
-            throw new UnauthorizedException();
+            throw new UnauthorizedException('Unauthorization: email or password dosen\'t match.');
         }
         const   { accessToken, refreshToken } = await this.generateTokens(user.userId);
         // Stoore the hashed refresh-token in DB 
@@ -107,6 +107,7 @@ export class AuthService {
         });
 
         const   { accessToken, refreshToken } = await this.generateTokens(refreshPayload.userId);
+        await this.storeRefreshToken({ refreshToken: refreshToken, userId: refreshPayload.userId });
         return {
             accessToken: accessToken,
             refreshToken: refreshToken

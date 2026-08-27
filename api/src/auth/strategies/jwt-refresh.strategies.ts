@@ -15,18 +15,21 @@ export  class   JwtRefreshStrategy  extends PassportStrategy(Strategy, 'refreshT
     ) {
         super({
             jwtFromRequest: ExtractJwt.fromExtractors([
-                (req: Request) => req?.cookies?.refreshToken,
+                (req: Request) => {
+                    console.log("Extract from HTTP-ONLY: ", req?.cookies?.refreshToken);
+                    return req?.cookies?.refreshToken;
+                },
             ]),
             secretOrKey: confgService.getOrThrow<string>('REFRESH_SECRET'),
             passReqToCallback: true,
-            ignoreExpiration: false
+            ignoreExpiration: true
         });
     }
     async   validate(req: Request, paylod: { sub: string, type: string }) {
         const   refreshToken = req.cookies.refreshToken;
         const   user = await this.usersService.findUserById(paylod.sub);
         if(!user || user.refreshTokens.length === 0) {
-            throw new UnauthorizedException();
+            throw new UnauthorizedException('Unauthorization: user or user.refreshToken dosen\'t match');
         }
         let   matchedToken = null;
         for(const token of user.refreshTokens) {
@@ -37,7 +40,7 @@ export  class   JwtRefreshStrategy  extends PassportStrategy(Strategy, 'refreshT
             }
         }
         if(!matchedToken || matchedToken.revoked) {
-            throw new UnauthorizedException();
+            throw new UnauthorizedException('Unauthorization: refresh token not match or revoked');
         }
         return {
             userId: user.id,

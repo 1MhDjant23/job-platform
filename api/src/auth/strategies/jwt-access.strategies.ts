@@ -12,10 +12,11 @@ export class    JwtAccessStrategy extends PassportStrategy(Strategy, 'accessToke
             ignoreExpiration: false
         });
     }
-    async validate(payload: { sub: string, email: string }) {
+    async validate(payload: { sub: string, type: string }) {
+        console.log("=========================================");
         return {
             userId: payload.sub, 
-            email: payload.email
+            type: payload.type
         };
     }
 } 
