@@ -1,0 +1,1 @@
+export  type CurrentUserPayload = { userId: string, type: string };

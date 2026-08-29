@@ -46,9 +46,5 @@ export  class   JwtRefreshStrategy  extends PassportStrategy(Strategy, 'refreshT
             userId: user.id,
             refreshTokenId: matchedToken.id
         };
-        //  (await Promise.all(user.refreshTokens.map(async(token) => {
-        //     const   isMatch = await bcrypt.compare(refreshToken, token.hashedRefresh);
-        //     return isMatch ? token : null;
-        // }))).find(t => t !== null);
     }
 }

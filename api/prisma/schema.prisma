@@ -15,14 +15,23 @@ datasource db {
 model User {
   id            String @id @default(uuid())
   email         String @unique
-  fullName      String @db.VarChar()
+  firstName      String @db.VarChar()
+  lastName      String @db.VarChar()
   passwordHash  String
   createdAt     DateTime @default(now()) @db.Timestamptz()
   updatedAt     DateTime @default(now()) @db.Timestamptz()
-
+  role          Role @default(Public)
   refreshTokens RefreshToken[]
+
+  company       Company?
 }
 
+enum  Role {
+  Employer
+  JobSeeker
+  Admin
+  Public
+}
 
 model RefreshToken {
   id    String  @id @default(uuid())
@@ -33,4 +42,26 @@ model RefreshToken {
   revoked Boolean  @default(false)
   createdAt DateTime  @default(now()) @db.Timestamptz()
   expiredAt DateTime  @db.Timestamptz()
+}
+
+model Company {
+  id          String  @id @unique @default(uuid())
+  ownerId      String @unique
+  owner        User  @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  name        String 
+  description String
+  website         String
+  location    String
+  logoUrl     String
+  createdAt   DateTime @default(now())  @db.Timestamptz()
+  jobs        Jobs[]
+}
+
+model Jobs {
+  id          String  @id @unique @default(uuid())
+  name        String
+  description String
+  companyId   String
+  company     Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  createdAt   DateTime  @default(now()) @db.Timestamptz()
 }

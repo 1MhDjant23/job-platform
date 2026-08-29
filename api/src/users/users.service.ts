@@ -1,20 +1,24 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import bcrypt      from 'bcrypt';
-import { RefreshToken } from '@prisma/client';
+import { RefreshToken, Roles } from '@prisma/client';
 
 interface User {
     id: string
     email: string
     passwordHash: string
-    fullName: string
+    firstName: string
     createdAt: Date
+    lastName: string
+    role: Roles
     updatedAt: Date
 }
 
 export interface   SignUpUser {
-    fullName: string
+    firstName: string
+    lastName: string
     email: string
+    role:   Roles
     password: string
 }
 
@@ -40,8 +44,10 @@ export class UsersService {
         await this.prisma.user.create({
             data: {
                 email: credentials.email,
-                fullName: credentials.fullName,
-                passwordHash: credentials.password
+                firstName: credentials.firstName,
+                lastName: credentials.lastName,
+                passwordHash: credentials.password,
+                role: credentials.role
             }
         });
     }

@@ -1,5 +1,7 @@
+import { Roles } from '@prisma/client';
 import  {
     IsEmail,
+    IsEnum,
     IsNotEmpty,
     IsString,
     MinLength,
@@ -18,7 +20,14 @@ export  class LoginDto {
 export  class   signUpDto {
     @IsNotEmpty()
     @IsString()
-    fullName!: string
+    firstName!: string
+
+    @IsNotEmpty()
+    @IsString()
+    lastName!: string
+
+    @IsEnum(Roles)
+    role!:   Roles
 
     @IsEmail()
     email!: string
