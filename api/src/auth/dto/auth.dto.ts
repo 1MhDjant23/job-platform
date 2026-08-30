@@ -1,4 +1,4 @@
-import { Roles } from '@prisma/client';
+import { Role } from '@prisma/client';
 import  {
     IsEmail,
     IsEnum,
@@ -15,6 +15,9 @@ export  class LoginDto {
     @IsString()
     @IsNotEmpty()
     password!: string
+
+    @IsEnum(Role)
+    role!:   Role
 }
 /*******    *********** ******** */
 export  class   signUpDto {
@@ -26,8 +29,8 @@ export  class   signUpDto {
     @IsString()
     lastName!: string
 
-    @IsEnum(Roles)
-    role!:   Roles
+    @IsEnum(Role)
+    role!:   Role
 
     @IsEmail()
     email!: string

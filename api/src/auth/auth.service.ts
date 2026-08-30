@@ -4,12 +4,14 @@ import  bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { Role } from '@prisma/client';
+import { RefreshPayload } from './auth.controller';
 
 type AuthInput = {email: string, password: string};
 type AuthResult = {accessToken: string, refreshToken: string, user: User};
-type Validated = {userId: string, email: string };
+type Validated = {userId: string, email: string, role: Role };
 type GenerateTokensResult = { accessToken: string, refreshToken: string };
-type User = { userId: string, email: string };
+type User = { userId: string, email: string, role: Role };
 
 
 @Injectable()
@@ -31,23 +33,23 @@ export class AuthService {
         if(!user) {
             throw new UnauthorizedException('Unauthorization: email or password dosen\'t match.');
         }
-        const   { accessToken, refreshToken } = await this.generateTokens(user.userId);
+        const   { accessToken, refreshToken } = await this.generateTokens(user.userId, user.role);
         // Stoore the hashed refresh-token in DB 
         await this.storeRefreshToken({ refreshToken: refreshToken, userId: user.userId });
         return {
-            user: { userId: user.userId, email: user.email },
+            user: { userId: user.userId, email: user.email, role: user.role },
             accessToken: accessToken,
             refreshToken: refreshToken
         }
     }
 /*******    *********** ******** */
-    async   generateTokens(sub: string) : Promise<GenerateTokensResult> {
-        const   accesToken = this.jwtService.sign({ sub: sub, type: 'access' }, {
+    async   generateTokens(sub: string, role: Role) : Promise<GenerateTokensResult> {
+        const   accesToken = this.jwtService.sign({ sub: sub, type: 'access', role: role }, {
             secret: this.confgService.getOrThrow<string>('ACCESS_SECRET'),
             expiresIn: Number(this.confgService.getOrThrow<string>('JWT_ACCESS_EXPIRES_IN'))
         });
 
-        const   refreshToken = this.jwtService.sign({ sub: sub, type: 'refresh' }, {
+        const   refreshToken = this.jwtService.sign({ sub: sub, type: 'refresh', role: role }, {
             expiresIn: Number(this.confgService.getOrThrow<string>('JWT_REFRESH_EXPIRES_IN')),
             secret: this.confgService.getOrThrow<string>('REFRESH_SECRET')
         });
@@ -69,7 +71,8 @@ export class AuthService {
         }
         return {
             userId: userMatch.id,
-            email: userMatch.email
+            email: userMatch.email,
+            role: userMatch.role
         }
     }
 /*******    *********** ******** */
@@ -100,17 +103,18 @@ export class AuthService {
 /*******    *********** ******** */
 /**         REFRESH PART         */
 /*******    *********** ******** */
-    async refresh(refreshPayload: { userId: string, refreshTokenId: string }) {
-        const   revokOldToken = await this.prisma.refreshToken.update({
+    async refresh(refreshPayload: RefreshPayload) {
+        await this.prisma.refreshToken.update({
             where: { id: refreshPayload.refreshTokenId },
             data: { revoked: true,  }
         });
 
-        const   { accessToken, refreshToken } = await this.generateTokens(refreshPayload.userId);
+        const   { accessToken, refreshToken } = await this.generateTokens(refreshPayload.userId, refreshPayload.role);
         await this.storeRefreshToken({ refreshToken: refreshToken, userId: refreshPayload.userId });
         return {
             accessToken: accessToken,
-            refreshToken: refreshToken
+            refreshToken: refreshToken,
+            role: refreshPayload.role
         }
     }
 }

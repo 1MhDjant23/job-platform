@@ -15,8 +15,11 @@ import { AuthService } from './auth.service';
 import { LoginDto, signUpDto } from './dto/auth.dto';
 import { ConfigService } from '@nestjs/config';
 import { JwtRefreshGuard } from './guards/jwt-refresh.guards';
+import { CurrentUser } from 'src/common/decorators/current-user.decorator';
+import { CurrentUserPayload } from 'src/common/types/users.types';
+import { Role } from '@prisma/client';
 
-type    RefreshRequest = Request & {user: { userId: string, refreshTokenId: string }};
+export type    RefreshPayload = { userId: string, refreshTokenId: string, role: Role };
 
 @Controller('auth')
 export class AuthController {
@@ -56,8 +59,8 @@ export class AuthController {
 /*******    *********** ******** */
     @Get('refresh')
     @UseGuards(JwtRefreshGuard)
-    async getRefreshToken(@Req() req: RefreshRequest, @Res({ passthrough: true }) res: Response) {
-        const   { accessToken, refreshToken } = await this.authService.refresh(req.user)
+    async getRefreshToken(@CurrentUser() user: RefreshPayload, @Res({ passthrough: true }) res: Response) {
+        const   { accessToken, refreshToken, role } = await this.authService.refresh(user)
         
         res.cookie('refreshToken', refreshToken, {
             httpOnly: true,
@@ -69,7 +72,8 @@ export class AuthController {
 
         return {
             accessToken: accessToken,
-            userId: req.user.userId
+            userId: user.userId,
+            role: role
         };
     }
 

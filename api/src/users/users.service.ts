@@ -1,7 +1,7 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import bcrypt      from 'bcrypt';
-import { RefreshToken, Roles } from '@prisma/client';
+import { RefreshToken, Role } from '@prisma/client';
 
 interface User {
     id: string
@@ -10,7 +10,7 @@ interface User {
     firstName: string
     createdAt: Date
     lastName: string
-    role: Roles
+    role: Role
     updatedAt: Date
 }
 
@@ -18,7 +18,7 @@ export interface   SignUpUser {
     firstName: string
     lastName: string
     email: string
-    role:   Roles
+    role:   Role
     password: string
 }
 
