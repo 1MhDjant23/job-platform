@@ -16,8 +16,8 @@ export  class LoginDto {
     @IsNotEmpty()
     password!: string
 
-    @IsEnum(Role)
-    role!:   Role
+    // @IsEnum(Role)
+    // role!:   Role
 }
 /*******    *********** ******** */
 export  class   signUpDto {
@@ -40,3 +40,11 @@ export  class   signUpDto {
     password!: string
 }
 
+
+//"accessToken": 
+// "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1YTlhYTkzZi00NjZjLTRiMTktOGQ1Yi1kNGM2YWQxODc3OGQiLCJ0eXBlIjoiYWNjZXNzIiwicm9sZSI6IkVtcGxveWVyIiwiaWF0IjoxNzg4Mjg2NDAwLCJleHAiOjE3ODgyODY4MjB9.9spi3XP-SRAkt_zJwh3QymGVEb5Fx-ls8txH6Htb3k4"
+
+//refreshtoken
+// ""
+
+//*********** */

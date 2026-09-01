@@ -2,6 +2,7 @@ import { PassportStrategy } from "@nestjs/passport";
 import { ExtractJwt, Strategy } from    'passport-jwt';
 import  { Injectable }  from    '@nestjs/common';
 import { ConfigService } from "@nestjs/config";
+import { Role } from "@prisma/client";
 
 @Injectable()
 export class    JwtAccessStrategy extends PassportStrategy(Strategy, 'accessToken') {
@@ -12,11 +13,12 @@ export class    JwtAccessStrategy extends PassportStrategy(Strategy, 'accessToke
             ignoreExpiration: false
         });
     }
-    async validate(payload: { sub: string, type: string }) {
-        console.log("=========================================");
+    async validate(payload: { sub: string, type: string, role: Role }) {
+        console.log("=======================================::::");
         return {
             userId: payload.sub, 
-            type: payload.type
+            type: payload.type,
+            role: payload.role
         };
     }
 } 

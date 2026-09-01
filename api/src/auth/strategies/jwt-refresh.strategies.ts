@@ -17,13 +17,13 @@ export  class   JwtRefreshStrategy  extends PassportStrategy(Strategy, 'refreshT
         super({
             jwtFromRequest: ExtractJwt.fromExtractors([
                 (req: Request) => {
-                    console.log("Extract from HTTP-ONLY: ", req?.cookies?.refreshToken);
+                    console.log("Extract from HTTP-ONLY: ", req?.cookies);
                     return req?.cookies?.refreshToken;
                 },
             ]),
             secretOrKey: confgService.getOrThrow<string>('REFRESH_SECRET'),
             passReqToCallback: true,
-            ignoreExpiration: true
+            ignoreExpiration: false
         });
     }
     async   validate(req: Request, paylod: { sub: string, type: string, role: Role }) {
