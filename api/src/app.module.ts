@@ -6,6 +6,7 @@ import { UsersModule } from './users/users.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
 import { CompaniesModule } from './companies/companies.module';
+import { UploadModule } from './upload/upload.module';
 
 @Module({
   imports: [
@@ -24,7 +25,8 @@ import { CompaniesModule } from './companies/companies.module';
     PrismaModule,
     UsersModule,
     AuthModule,
-    CompaniesModule
+    CompaniesModule,
+    UploadModule
   ],
 
 })

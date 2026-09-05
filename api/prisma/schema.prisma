@@ -46,22 +46,42 @@ model RefreshToken {
 
 model Company {
   id          String  @id @unique @default(uuid())
-  ownerId     String @unique
-  owner       User  @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  ownerId     String  @unique
+  owner       User    @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   name        String 
   description String?
   website     String?
   location    String?
   logoUrl     String?
   createdAt   DateTime @default(now())  @db.Timestamptz()
+  approved    Boolean? @default(false)
   jobs        Jobs[]
 }
 
 model Jobs {
   id          String  @id @unique @default(uuid())
-  name        String
-  description String
+  title       String
+  description String @db.Text
+  salaryMin   Int?
+  salaryMax   Int?
   companyId   String
-  company     Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  status      JobStatus @default(OPEN)
+  type        JobType   @default(FULL_TIME)
   createdAt   DateTime  @default(now()) @db.Timestamptz()
+  expiresAt   DateTime?
+  updatedAt   DateTime  @default(now()) @db.Timestamptz()
+  company     Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+}
+
+enum JobStatus {
+  CLOSED
+  OPEN
+  EXPIRED
+}
+enum  JobType {
+  FULL_TIME
+  PART_TIME
+  CONTRACT
+  INTERNSHIP
+  REMOTE
 }

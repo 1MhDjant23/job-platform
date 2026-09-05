@@ -1,6 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { CreateCompanyDto } from './dto/create-company.dto';
+import { CreateCompanyDto, UpdateCompanyDto } from './dto/create-company.dto';
 import {
     ConflictException
 }   from    '@nestjs/common';
@@ -24,9 +24,59 @@ export class CompaniesService {
         });
     }
 /*******    *********** ******** */
+/*******    *********** ******** */
+/**         UPDATE-COMPANY       */
+/*******    *********** ******** */
+/*******    *********** ******** */
+    async update(updatePayload: UpdateCompanyDto, ownerId: string) {
+        // console.log("++++++++: ", Object.values(updatePayload).length);
+        // if(Object.keys(updatePayload).length === 0) {
+        //     throw new BadRequestException('At least one company field is required');
+        // }
+        const   company = await this.findCompanyByOwnerId(ownerId);
+        if(!company) {
+            throw new NotFoundException("You don't have company yet");
+        }
+        return await this.prisma.company.update({
+            where: {id: company.id},
+            data: updatePayload
+        });
+    }
+/*******    *********** ******** */
+
     async   findCompanyByOwnerId(ownerId: string ) {
-        return await this.prisma.company.findUnique({
+        const   exist = await this.prisma.company.findUnique({
             where: { ownerId: ownerId }
+        });
+        // if(!exist) {
+        //     throw new NotFoundException("You don't have company yet");
+        // }
+        return exist;
+    }
+/*******    *********** ******** */
+    async deleteCompany(ownerId: string) {
+        return this.prisma.company.delete({
+            where: {
+                ownerId: ownerId
+            }
+        })
+    }
+/*******    *********** ******** */
+    async   getCompanyId(id: string) {
+        const   exist = await this.prisma.company.findUnique({
+            where: { id: id },
+            include: { owner: { select: {firstName: true, lastName: true} } }
+        });
+        if(!exist) {
+            throw new NotFoundException('Company not found');
+        }
+        return exist;
+    }
+/*******    *********** ******** */
+    async approve(companyId: string) {
+        return await this.prisma.company.update({
+            where: {id: companyId},
+            data: { approved: true }
         });
     }
 /*******    *********** ******** */
