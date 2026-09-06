@@ -41,7 +41,7 @@ export class JobsService {
         //     throw new ConflictException('Company/Jobs conflict');
         // }
         await this.validateJob(data.jobId, data.ownerId);
-        return this.prisma.jobs.update({
+        return await this.prisma.jobs.update({
             where: {id: data.jobId},
             data: {status: data.status}
         })
@@ -50,10 +50,36 @@ export class JobsService {
     async updateJobType(data: {jobId: string, type: JobType, ownerId: string}) {
 
         await this.validateJob(data.jobId, data.ownerId);
-        return this.prisma.jobs.update({
+        return await this.prisma.jobs.update({
             where: {id: data.jobId},
             data: {type: data.type}
         })
+    }
+    /*******    *********** ******** */
+    async allJobs() {
+        return await this.prisma.jobs.findMany({
+            select: {id: true, title: true, status: true, type: true}
+        });
+    }
+    /*******    *********** ******** */
+    async oneJob(jobId: string) {
+        return await this.prisma.jobs.findUnique({
+            where: { id: jobId }
+        });
+    }
+    /*******    *********** ******** */
+    async delete(jobId: string, ownerId: string) {
+        await this.validateJob(jobId, ownerId);
+        return this.prisma.jobs.delete({
+            where: {id: jobId}
+        });
+    }  
+    /*******    *********** ******** */
+    async getMine(ownerId: string) {
+        const   company = await this.validCompany(ownerId);
+        return this.prisma.jobs.findMany({
+            where: {companyId: company.id}
+        });
     }
     /*******    *********** ******** */
     async   validateJob(jobId: string, ownerId: string) {

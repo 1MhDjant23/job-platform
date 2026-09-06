@@ -4,11 +4,13 @@ import {
     Body,
     UseGuards,
     Patch,
-    Param
- } from '@nestjs/common';
+    Param,
+    Delete,
+    Get
+} from '@nestjs/common';
 import { CreateJobDto, UpdateJobDto } from './dto/jobs.dto';
 import { Roles } from 'src/common/decorators/roles.decorator';
-import { JobStatus, Role } from '@prisma/client';
+import { JobStatus, JobType, Role } from '@prisma/client';
 import { JwtAccessGuard } from 'src/auth/guards/jwt-access.guards';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
@@ -34,7 +36,7 @@ export class JobsController {
         return this.jobService.update(updateJobDto, user.userId, jobId);
     }
     /*******    *********** ******** */
-    @Patch('id')
+    @Patch(':id')
     @Roles(Role.Employer)
     @UseGuards(JwtAccessGuard, RolesGuard)
     updateStatus(
@@ -45,16 +47,38 @@ export class JobsController {
         return this.jobService.updateStatus({ownerId: user.userId, status: dto.status, jobId: id});
     }
     /*******    *********** ******** */
-        @Patch('id')
+    @Patch(':id')
     @Roles(Role.Employer)
     @UseGuards(JwtAccessGuard, RolesGuard)
     updateJobType(
         @Param('id')    id: string,
         @CurrentUser()  user: CurrentUserPayload,
-        @Body()         dto: { jobType: JobStatus }
+        @Body()         dto: { jobType: JobType }
     ){
-        return this.jobService.updateJobType({ownerId: user.userId, status: dto.jobType, jobId: id});
+        return this.jobService.updateJobType({ownerId: user.userId, type: dto.jobType, jobId: id});
     }
-
-
+    /*******    *********** ******** */
+    @Get()
+    getJobs() {
+        return this.jobService.allJobs();
+    }
+    /*******    *********** ******** */
+    @Get(':id')
+    getOneJob(@Param('id') id: string) {
+        return this.jobService.oneJob(id);
+    }    
+    /*******    *********** ******** */
+    @Get('mine')
+    @Roles(Role.Employer)
+    @UseGuards(JwtAccessGuard, RolesGuard)
+    getMine(@CurrentUser() user: CurrentUserPayload) {
+        return this.jobService.getMine(user.userId);
+    }    
+    /*******    *********** ******** */
+    @Delete(':id')
+    @Roles(Role.Employer)
+    @UseGuards(JwtAccessGuard, RolesGuard)
+    deleteJob(@Param('id') id: string, @CurrentUser() user: CurrentUserPayload) {
+        return this.jobService.delete(id, user.userId);
+    }
 }
