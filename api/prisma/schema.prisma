@@ -1,0 +1,87 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id            String @id @default(uuid())
+  email         String @unique
+  firstName      String @db.VarChar()
+  lastName      String @db.VarChar()
+  passwordHash  String
+  createdAt     DateTime @default(now()) @db.Timestamptz()
+  updatedAt     DateTime @default(now()) @db.Timestamptz()
+  role          Role @default(Public)
+  refreshTokens RefreshToken[]
+
+  company       Company?
+}
+
+enum  Role {
+  Employer
+  JobSeeker
+  Admin
+  Public
+}
+
+model RefreshToken {
+  id    String  @id @default(uuid())
+  userId  String
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  hashedRefresh  String
+  userAgent  String?
+  revoked Boolean  @default(false)
+  createdAt DateTime  @default(now()) @db.Timestamptz()
+  expiredAt DateTime  @db.Timestamptz()
+}
+
+model Company {
+  id          String  @id @unique @default(uuid())
+  ownerId     String  @unique
+  owner       User    @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  name        String 
+  description String?
+  website     String?
+  location    String?
+  logoUrl     String?
+  createdAt   DateTime @default(now())  @db.Timestamptz()
+  approved    Boolean? @default(false)
+  jobs        Jobs[]
+}
+
+model Jobs {
+  id          String  @id @unique @default(uuid())
+  title       String
+  description String @db.Text
+  salaryMin   Int?
+  salaryMax   Int?
+  companyId   String
+  status      JobStatus @default(OPEN)
+  type        JobType   @default(FULL_TIME)
+  createdAt   DateTime  @default(now()) @db.Timestamptz()
+  expiresAt   DateTime?
+  updatedAt   DateTime  @default(now()) @db.Timestamptz()
+  company     Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+}
+
+enum JobStatus {
+  CLOSED
+  OPEN
+  EXPIRED
+}
+enum  JobType {
+  FULL_TIME
+  PART_TIME
+  CONTRACT
+  INTERNSHIP
+  REMOTE
+}
