@@ -6,7 +6,8 @@ import {
     Patch,
     Param,
     Delete,
-    Get
+    Get,
+    ParseUUIDPipe
 } from '@nestjs/common';
 import { CreateJobDto, UpdateJobDto } from './dto/jobs.dto';
 import { Roles } from 'src/common/decorators/roles.decorator';
@@ -63,22 +64,32 @@ export class JobsController {
         return this.jobService.allJobs();
     }
     /*******    *********** ******** */
-    @Get(':id')
+    @Get(':id') // get a single job by ID
     getOneJob(@Param('id') id: string) {
         return this.jobService.oneJob(id);
     }    
     /*******    *********** ******** */
-    @Get('mine')
+    @Get('mine') // Get all my jobs
     @Roles(Role.Employer)
     @UseGuards(JwtAccessGuard, RolesGuard)
     getMine(@CurrentUser() user: CurrentUserPayload) {
         return this.jobService.getMine(user.userId);
     }    
     /*******    *********** ******** */
-    @Delete(':id')
+    @Delete(':id') // delete a single job
     @Roles(Role.Employer)
     @UseGuards(JwtAccessGuard, RolesGuard)
     deleteJob(@Param('id') id: string, @CurrentUser() user: CurrentUserPayload) {
         return this.jobService.delete(id, user.userId);
+    }
+    /*******    *********** ******** */
+    @Get(':id/applications') // Get all applications for a single job
+    @Roles(Role.Employer)
+    @UseGuards(JwtAccessGuard, RolesGuard)
+    getApplications(
+        @CurrentUser() user: CurrentUserPayload,
+        @Param('id', ParseUUIDPipe) id: string
+    ) {
+
     }
 }

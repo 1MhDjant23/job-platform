@@ -110,7 +110,7 @@ enum  JobType {
 
 model Application {
   id  String  @id @unique @default(uuid())
-  status      ApplicationStatus
+  status      ApplicationStatus @default(Applied)
   coverLeter  String? @db.Text
   appliedAt DateTime  @default(now()) @db.Timestamptz()
 

@@ -3,12 +3,14 @@ import { CreateJobDto, UpdateJobDto } from './dto/jobs.dto';
 import { CompaniesService } from 'src/companies/companies.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Company, JobStatus, JobType } from '@prisma/client';
+import { ApplicationsService } from 'src/applications/applications.service';
 
 @Injectable()
 export class JobsService {
     constructor(
         private readonly companyService: CompaniesService,
-        private readonly prisma: PrismaService
+        private readonly prisma: PrismaService,
+        private readonly appService: ApplicationsService
     ) {}
     /*******    *********** ******** */
     async   create(dto: CreateJobDto, ownerId: string) {
@@ -80,6 +82,20 @@ export class JobsService {
         return this.prisma.jobs.findMany({
             where: {companyId: company.id}
         });
+    }
+    /*******    *********** ******** */
+    async getApplications(employerId: string, jobId: string) {
+        const   isMatch = await this.prisma.jobs.findFirst({
+            where: {
+                id: jobId,
+                company: {ownerId: employerId}
+            },
+            select: {id: true}
+        });
+        if(!isMatch) {
+            throw new ConflictException("Job dose not belong to your company");
+        }
+        return await this.appService.findApplicationsByJobId(jobId);
     }
     /*******    *********** ******** */
     async   validateJob(jobId: string, ownerId: string) {
