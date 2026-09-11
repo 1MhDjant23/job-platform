@@ -118,7 +118,7 @@ model Application {
   jobId String
   applicantId String
 
-  applicant User  @relation(fields: [applicantId], references: [id])
+  applicant User  @relation(fields: [applicantId], references: [id], onDelete: Cascade)
   job Jobs  @relation(fields: [jobId], references: [id])
 }
 

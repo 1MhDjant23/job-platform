@@ -10,7 +10,6 @@ import {
 export class CompaniesService {
     constructor(private readonly    prisma: PrismaService) {}
 /*******    *********** ******** */
-/*******    *********** ******** */
 /**         CREATE-COMPANY       */
 /*******    *********** ******** */
     async   create(userId: string, dto: CreateCompanyDto) {
@@ -24,9 +23,7 @@ export class CompaniesService {
         });
     }
 /*******    *********** ******** */
-/*******    *********** ******** */
 /**         UPDATE-COMPANY       */
-/*******    *********** ******** */
 /*******    *********** ******** */
     async update(updatePayload: UpdateCompanyDto, ownerId: string) {
         // console.log("++++++++: ", Object.values(updatePayload).length);
@@ -74,6 +71,13 @@ export class CompaniesService {
     }
 /*******    *********** ******** */
     async approve(companyId: string) {
+        const   exist = await this.prisma.company.findUnique({
+            where: { id: companyId },
+            select: { id: true }
+        });
+        if(exist) {
+            throw new NotFoundException('Company not found');
+        }
         return await this.prisma.company.update({
             where: {id: companyId},
             data: { approved: true }

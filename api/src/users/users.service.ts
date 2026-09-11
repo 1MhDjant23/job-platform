@@ -51,6 +51,30 @@ export class UsersService {
             }
         });
     }
+/*******    *********** ******** */
+    async allUsers() {
+        return await this.prisma.user.findMany({
+            where: {
+                role: { not: Role.Admin }
+            },
+            select: {
+                id: true, email: true,
+                firstName: true, lastName: true,
+                createdAt: true, updatedAt: true,
+                role: true
+            }
+        });
+    }
+/*******    *********** ******** */
+    async delete(userId: string) {
+
+        return await this.prisma.user.delete({
+            where: { id: userId },
+            select: { id: true }
+        })
+    }
+
+
     // Get All users
     // async findAll() {
     //     return this.prisma.user.findMany({
