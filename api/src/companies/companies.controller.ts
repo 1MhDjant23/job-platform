@@ -21,8 +21,8 @@ import type { CurrentUserPayload } from 'src/common/types/users.types';
 import { Roles } from 'src/common/decorators/roles.decorator';
 import { Role } from '@prisma/client';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { Multer } from 'multer';
+// import { FileInterceptor } from '@nestjs/platform-express';
+// import { Multer } from 'multer';
 
 @Controller('companies')
 export class CompaniesController {
@@ -77,23 +77,19 @@ export class CompaniesController {
     }
 /*******    *********** ******** */
     // Upload logo
-    @Post('me/logo')
-    @Roles(Role.Employer)
-    @UseInterceptors(FileInterceptor('logo', {
-        
-    }))
-    @UseGuards(JwtAccessGuard, RolesGuard)
-    uploadLogo(
-        @CurrentUser() user: CurrentUserPayload,
-        @UploadedFile() file: Express.Multer.File
-    ) {
-        console.log("----------------------");
-        if(!file)
-        {
-            throw new BadRequestException("upload a logo");
-        }
-        console.log(file)
-        return "Logo of company";
-    }
+    // @Post('me/logo')
+    // @Roles(Role.Employer)
+    // @UseGuards(JwtAccessGuard, RolesGuard)
+    // uploadLogo(
+    //     @CurrentUser() user: CurrentUserPayload
+    // ) {
+    //     console.log("----------------------");
+    //     if(!file)
+    //     {
+    //         throw new BadRequestException("upload a logo");
+    //     }
+    //     console.log(file)
+    //     return "Logo of company";
+    // }
 
 }

@@ -4,11 +4,15 @@ import { CreateCompanyDto, UpdateCompanyDto } from './dto/create-company.dto';
 import {
     ConflictException
 }   from    '@nestjs/common';
+import { UploadService } from 'src/upload/upload.service';
 
 
 @Injectable()
 export class CompaniesService {
-    constructor(private readonly    prisma: PrismaService) {}
+    constructor(
+        private readonly    prisma: PrismaService,
+        private readonly    uploadService: UploadService
+    ) {}
 /*******    *********** ******** */
 /**         CREATE-COMPANY       */
 /*******    *********** ******** */
@@ -33,6 +37,10 @@ export class CompaniesService {
         const   company = await this.findCompanyByOwnerId(ownerId);
         if(!company) {
             throw new NotFoundException("You don't have company yet");
+        }
+        // removing OLLD logo from the Disk
+        if(updatePayload.logoUrl && updatePayload.logoUrl !== company.logoUrl) {
+            this.uploadService.deleteFile(updatePayload.logoUrl);
         }
         return await this.prisma.company.update({
             where: {id: company.id},

@@ -4,8 +4,9 @@ import { extname } from "path";
 import {BadRequestException} from '@nestjs/common';
 import { randomUUID } from "crypto";
 
+export  type Folder = 'logos' | 'avatars'| 'resumes';
 
-export  function imageMulterConfig(folder: 'logos' | 'avatars') : MulterOptions {
+export  function imageMulterConfig(folder: Folder) : MulterOptions {
     return {
         storage: diskStorage({
                 destination:   `./uploads/${folder}`,

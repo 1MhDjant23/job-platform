@@ -19,4 +19,4 @@ export  const   resumeMulterConfig: MulterOptions = {
         }
         cb(null, true);
     }
-}
+}   

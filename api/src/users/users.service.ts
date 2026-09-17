@@ -2,6 +2,7 @@ import { ConflictException, Injectable, NotFoundException } from '@nestjs/common
 import { PrismaService } from '../prisma/prisma.service';
 import bcrypt      from 'bcrypt';
 import { RefreshToken, Role } from '@prisma/client';
+import { UpdateUserDto } from './dto/users.dto';
 
 interface User {
     id: string
@@ -25,6 +26,11 @@ export interface   SignUpUser {
 @Injectable()
 export class UsersService {
     constructor(private readonly prisma: PrismaService) {}
+/*******    *********** ******** */
+    async update(userId: string, dto: UpdateUserDto) {
+        
+
+    }
 /*******    *********** ******** */
     async findUserByEmail(email: string) : Promise<User | null> {
         console.log("Email from user service: ", email);

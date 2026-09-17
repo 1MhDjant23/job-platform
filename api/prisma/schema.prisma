@@ -21,6 +21,7 @@ model User {
   createdAt     DateTime @default(now()) @db.Timestamptz()
   updatedAt     DateTime @default(now()) @db.Timestamptz()
   resumUrl      String?
+  avatarUrl     String?
 
   role          Role @default(Public)
   refreshTokens RefreshToken[]
