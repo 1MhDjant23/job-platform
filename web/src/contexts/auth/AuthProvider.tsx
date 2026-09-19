@@ -1,0 +1,84 @@
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import type { User } from "../../types";
+import { api, setAccessToken } from "../../lib/axios";
+import { useNavigate } from "react-router-dom";
+import { AuthContext } from "./AuthContext";
+
+export interface AuthContextValue { // what exposed to every comp
+    user:       User | null,
+    isLoading:  boolean,
+    login:      (email: string, password: string) => Promise<void>,
+    register:   (data: RegisterPayload) => Promise<void>
+    logout:     () => Promise<void>
+}
+
+
+interface   RegisterPayload {
+    firstname: string,
+    lastname: string,
+    email: string,
+    password: string,
+    role: 'JOB_SEEKER' | 'EMPLOYER'
+}
+
+export  function AuthProvider({ children } : { children: React.ReactNode }) {
+    const   [user, setUser] = useState<User|null>(null);
+    const   [isLoading, setIsLoading] = useState<boolean>(true);
+
+    // runs once when the app loads
+    useEffect(() => {
+        const   restorSession = async () => {
+            try {
+                const   {data} = await api
+                    .get<{data: {accessToken: string, user: User}}>('/auth/refresh', { withCredentials: true });
+                
+                setAccessToken(data.data.accessToken);
+                setUser(data.data.user);
+            } catch {
+                setAccessToken(null);
+                setUser(null);
+                console.log("Catch in restore session")
+            } finally{
+                setIsLoading(false);
+            }
+        }
+        restorSession();
+    }, [])
+
+    // Login
+    const   navigate = useNavigate();
+    const   login = useCallback(async (email: string, password: string) => {
+        const   { data } = await api.post<{data: {accessToken: string, user: User}}>('/auth/login', {email, password});
+        setAccessToken(data.data.accessToken);
+        setUser(data.data.user);
+    }, []);
+    // Register
+    const   register = useCallback(async (payload: RegisterPayload) => {
+        await api.post('/auth/signup', payload);
+        navigate('/auth/login', { replace: true });
+    }, [navigate]);
+    // logout
+    const   logout = useCallback(async () => {
+        try {
+            await api.post('/auth/logout');
+        } finally {
+            setUser(null);
+            setAccessToken(null);
+        }
+        await api.post('/auth/logout');
+    }, [])
+
+    // Context value
+    // useMemo prevents new object reference on every render
+    const   value = useMemo<AuthContextValue>(
+        () => ({ user, isLoading, login, register, logout }),
+        [user, isLoading, login, register, logout]
+    );
+    return (
+        <AuthContext.Provider value={value}>
+            <h1>Auth Provider</h1>
+            {children}
+            <h1>Auth Provider</h1>
+        </AuthContext.Provider>
+    );
+}
