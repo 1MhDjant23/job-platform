@@ -1,19 +1,20 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import bcrypt      from 'bcrypt';
-import { RefreshToken, Role } from '@prisma/client';
+import { RefreshToken, Role, User } from '@prisma/client';
 import { UpdateUserDto } from './dto/users.dto';
+import { ValidatedUser } from 'src/auth/auth.service';
 
-interface User {
-    id: string
-    email: string
-    passwordHash: string
-    firstName: string
-    createdAt: Date
-    lastName: string
-    role: Role
-    updatedAt: Date
-}
+// interface User {
+//     id: string
+//     email: string
+//     passwordHash: string
+//     firstName: string
+//     createdAt: Date
+//     lastName: string
+//     role: Role
+//     updatedAt: Date
+// }
 
 export interface   SignUpUser {
     firstName: string
@@ -39,7 +40,7 @@ export class UsersService {
         });
     }
 /*******    *********** ******** */
-    async findUserById(userId: string) : Promise<User& {refreshTokens: RefreshToken[]} | null> {
+    async findUserById(userId: string) : Promise<ValidatedUser& {refreshTokens: RefreshToken[]} | null> {
         return await this.prisma.user.findUnique({
             where: { id: userId },
             include: {refreshTokens: true}

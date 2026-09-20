@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { User } from "../../types";
 import { api, setAccessToken } from "../../lib/axios";
 import { useNavigate } from "react-router-dom";
@@ -11,7 +11,6 @@ export interface AuthContextValue { // what exposed to every comp
     register:   (data: RegisterPayload) => Promise<void>
     logout:     () => Promise<void>
 }
-
 
 interface   RegisterPayload {
     firstname: string,
@@ -26,11 +25,14 @@ export  function AuthProvider({ children } : { children: React.ReactNode }) {
     const   [isLoading, setIsLoading] = useState<boolean>(true);
 
     // runs once when the app loads
+    const   counter = useRef(0);
     useEffect(() => {
+        console.log("restore session Runed: ", counter.current++);
         const   restorSession = async () => {
             try {
                 const   {data} = await api
-                    .get<{data: {accessToken: string, user: User}}>('/auth/refresh', { withCredentials: true });
+                    .get<{data: {accessToken: string, user: User}}>
+                    ('/auth/refresh', { withCredentials: true });
                 
                 setAccessToken(data.data.accessToken);
                 setUser(data.data.user);
@@ -48,14 +50,19 @@ export  function AuthProvider({ children } : { children: React.ReactNode }) {
     // Login
     const   navigate = useNavigate();
     const   login = useCallback(async (email: string, password: string) => {
-        const   { data } = await api.post<{data: {accessToken: string, user: User}}>('/auth/login', {email, password});
+        const   { data } = await api
+            .post<{data: {accessToken: string, user: User}}>
+            ('/auth/login', {email, password}, { withCredentials: true });
         setAccessToken(data.data.accessToken);
+        console.log("access Token In Login: ", data.data.accessToken);
+
+        console.log("User In Login: ", data.data.user);
         setUser(data.data.user);
     }, []);
     // Register
     const   register = useCallback(async (payload: RegisterPayload) => {
         await api.post('/auth/signup', payload);
-        navigate('/auth/login', { replace: true });
+        navigate('/login', { replace: true });
     }, [navigate]);
     // logout
     const   logout = useCallback(async () => {

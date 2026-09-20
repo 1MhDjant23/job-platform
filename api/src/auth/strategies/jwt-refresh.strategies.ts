@@ -17,7 +17,7 @@ export  class   JwtRefreshStrategy  extends PassportStrategy(Strategy, 'refreshT
         super({
             jwtFromRequest: ExtractJwt.fromExtractors([
                 (req: Request) => {
-                    console.log("Extract from HTTP-ONLY: ", req?.cookies);
+                    console.log("Extract from HTTP-ONLY: ", req.cookies);
                     return req?.cookies?.refreshToken;
                 },
             ]),
@@ -27,13 +27,18 @@ export  class   JwtRefreshStrategy  extends PassportStrategy(Strategy, 'refreshT
         });
     }
     async   validate(req: Request, paylod: { sub: string, type: string, role: Role }) {
+
         const   refreshToken = req.cookies.refreshToken;
         const   user = await this.usersService.findUserById(paylod.sub);
         if(!user || user.refreshTokens.length === 0) {
-            throw new UnauthorizedException('Unauthorization: user or user.refreshToken dosen\'t match');
+            console.log("User__:", user);
+            throw new UnauthorizedException('Unauthorization: user/user.refreshToken dosen\'t match');
         }
         let   matchedToken = null;
         for(const token of user.refreshTokens) {
+            if(token.revoked) {
+                continue ;
+            }
             const   isMatch = await bcrypt.compare(refreshToken, token.hashedRefresh);
             if(isMatch) {
                 matchedToken = token;

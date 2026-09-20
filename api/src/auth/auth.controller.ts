@@ -42,13 +42,15 @@ export class AuthController {
             httpOnly: true,
             secure: this.confgService.getOrThrow<string>('NODE_ENV') === 'production',
             sameSite: 'strict',
-            path: '/auth/refresh',
+            path: '/',
             maxAge: 7 * 24 * 60 * 60 * 1000
         });
 
         return {
-            user: authResult.user,
-            access_token: authResult.accessToken
+            data : {
+                user: authResult.user,
+                accessToken: authResult.accessToken
+            }
         } 
     }
 /*******    *********** ******** */
@@ -59,21 +61,22 @@ export class AuthController {
 /*******    *********** ******** */
     @Get('refresh')
     @UseGuards(JwtRefreshGuard)
-    async getRefreshToken(@CurrentUser() user: RefreshPayload, @Res({ passthrough: true }) res: Response) {
-        const   { accessToken, refreshToken, role } = await this.authService.refresh(user)
+    async getRefreshToken(@CurrentUser() u: RefreshPayload, @Res({ passthrough: true }) res: Response) {
+        const   { accessToken, refreshToken, user } = await this.authService.refresh(u)
         
         res.cookie('refreshToken', refreshToken, {
             httpOnly: true,
             sameSite: true,
             secure: this.confgService.getOrThrow<string>('NODE_ENV') === 'production',
-            path: '/auth/refresh',
+            path: '/',
             maxAge: 7 * 24 * 60 * 60 * 1000
         });
 
         return {
-            accessToken: accessToken,
-            userId: user.userId,
-            role: role
+            data: {
+                accessToken: accessToken,
+                user
+            }
         };
     }
 

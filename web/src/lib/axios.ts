@@ -10,7 +10,7 @@ export const    setAccessToken = (token: string | null): void => {_accessToken =
 
 
 export  const api = axios.create({
-    baseURL: import.meta.VITE_API_URL,
+    baseURL: import.meta.env.VITE_API_URL,
     headers: {
         'Content-Type': 'application/json'
     }
@@ -20,6 +20,7 @@ export  const api = axios.create({
 
 api.interceptors.request.use(
     (config) => {
+        console.log("###### ", import.meta.env.VITE_API_URL)
         const   token = getAccessToken();
         if(token) {
             config.headers.Authorization = `Bearer ${token}`
@@ -37,12 +38,13 @@ api.interceptors.response.use(
         const   original = error.config; // that the request that failed
         const   is401 = error.response?.status === 401;
         const   notRetried = !original._retry;
-        const   notRefresh = original.url?.includes('/auth/refresh');
+        const   notRefresh = !original.url?.includes('/auth/refresh');
+        console.log("In response interceptor: ", original.url.includes('/auth/refresh'));
 
         if(is401 && notRefresh && notRetried) {
             original._retry = true; // don't retry again
             try {
-                const   {data} = await api.post('/auth/refresh');
+                const   {data} = await api.get('/auth/refresh');
                 const   newToken = data.data.accessToken;
                 setAccessToken(newToken);
                 original.headers.Authorization = `Bearer ${newToken}`;
