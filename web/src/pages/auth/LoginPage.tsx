@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Link, useNavigate } from "react-router-dom";
 import { Input } from "../../components/ui/Input";
 import { Button } from "../../components/ui/Button";
+// import { Spinner } from "../../components/ui/Spinner";
 
 export default function LoginPage() {
     
@@ -45,6 +46,10 @@ export default function LoginPage() {
             }
         }
     }
+
+    // if(isLoading) {
+    //     return <Spinner />
+    // }
 
     return (
         <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">

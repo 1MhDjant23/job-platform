@@ -1,8 +1,11 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { User } from "../../types";
 import { api, setAccessToken } from "../../lib/axios";
-import { useNavigate } from "react-router-dom";
+// import { data, useNavigate } from "react-router-dom";
 import { AuthContext } from "./AuthContext";
+import type { RegisterFormData } from "../../lib/validations/auth.schema";
+
+export type RegisterPayload = Omit<RegisterFormData, 'confirmPassword'>
 
 export interface AuthContextValue { // what exposed to every comp
     user:       User | null,
@@ -12,13 +15,13 @@ export interface AuthContextValue { // what exposed to every comp
     logout:     () => Promise<void>
 }
 
-interface   RegisterPayload {
-    firstname: string,
-    lastname: string,
-    email: string,
-    password: string,
-    role: 'JOB_SEEKER' | 'EMPLOYER'
-}
+// interface   RegisterPayload {
+//     firstname: string,
+//     lastname: string,
+//     email: string,
+//     password: string,
+//     role: 'JOB_SEEKER' | 'EMPLOYER'
+// }
 
 export  function AuthProvider({ children } : { children: React.ReactNode }) {
     const   [user, setUser] = useState<User|null>(null);
@@ -48,7 +51,7 @@ export  function AuthProvider({ children } : { children: React.ReactNode }) {
     }, [])
 
     // Login
-    const   navigate = useNavigate();
+    // const   navigate = useNavigate();
     const   login = useCallback(async (email: string, password: string) => {
         const   { data } = await api
             .post<{data: {accessToken: string, user: User}}>
@@ -61,9 +64,13 @@ export  function AuthProvider({ children } : { children: React.ReactNode }) {
     }, []);
     // Register
     const   register = useCallback(async (payload: RegisterPayload) => {
-        await api.post('/auth/signup', payload);
-        navigate('/login', { replace: true });
-    }, [navigate]);
+        const {data} = await api
+            .post<{data: {accessToken: string, user: User}}>
+            ('/auth/signup', payload);
+        setAccessToken(data.data.accessToken);
+        setUser(data.data.user);
+        // navigate('/', { replace: true });
+    }, []);
     // logout
     const   logout = useCallback(async () => {
         try {
