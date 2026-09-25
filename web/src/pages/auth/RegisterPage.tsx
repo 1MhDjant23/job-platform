@@ -62,7 +62,7 @@ export function RegisterPage() {
 
 
             await registerUser(payload);
-
+            console.log()
             if(data.role === 'EMPLOYER') {
                 navigate('/setup-company', {replace: true});
             } else {
