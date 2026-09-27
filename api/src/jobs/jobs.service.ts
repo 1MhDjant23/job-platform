@@ -1,9 +1,10 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
-import { CreateJobDto, UpdateJobDto } from './dto/jobs.dto';
+import { CreateJobDto, GetJobsQueryDto, UpdateJobDto } from './dto/jobs.dto';
 import { CompaniesService } from 'src/companies/companies.service';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { Company, JobStatus, JobType } from '@prisma/client';
+import { Company, JobStatus, JobType, Prisma } from '@prisma/client';
 import { ApplicationsService } from 'src/applications/applications.service';
+import { title } from 'process';
 
 @Injectable()
 export class JobsService {
@@ -58,10 +59,68 @@ export class JobsService {
         })
     }
     /*******    *********** ******** */
-    async allJobs() {
-        return await this.prisma.jobs.findMany({
-            select: {id: true, title: true, status: true, type: true}
-        });
+    async allJobs(query: GetJobsQueryDto) {
+        const { search, status, type, page = 1, limit = 20 } = query;
+        const   skip = (page - 1) * limit;
+
+        const where: Prisma.JobsWhereInput = {
+            ...(status && { status }),
+            ...(type && { type }),
+            ...(search && {
+            OR: [
+                {
+                title: {
+                    contains: search,
+                    mode: 'insensitive',
+                },
+                },
+                {
+                description: {
+                    contains: search,
+                    mode: 'insensitive',
+                },
+                },
+            ],
+            }),
+        };
+        const   [jobs, total] = await this.prisma.$transaction([
+            this.prisma.jobs.findMany({
+                where,
+                skip,
+                take: limit,
+                orderBy: {
+                    createdAt: 'desc'
+                },
+                select: {
+                    id: true,
+                    title: true,
+                    status: true,
+                    type: true,
+                    salaryMax: true,
+                    salaryMin: true,
+                    createdAt: true,
+                    company: {
+                        select: {
+                            id: true,
+                            name: true,
+                            location: true,
+                            logoUrl: true
+                        }
+                    }
+                }
+            }),
+            this.prisma.jobs.count({ where }),
+        ]);
+        return {
+            data: jobs,
+            meta: {
+                total,
+                page,
+                limit,
+                totalPages: Math.ceil(total / limit)
+            }
+        }
+
     }
     /*******    *********** ******** */
     async oneJob(jobId: string) {

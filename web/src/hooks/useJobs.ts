@@ -1,6 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import type { Job, PaginatedResponse } from "../types";
 import { api } from "../lib/axios";
+import { id } from "zod/v4/locales";
+import { string } from "zod/v4";
 // import { URLSearchParams } from "url";
 
 
@@ -15,6 +17,7 @@ export interface JobFilters {
   tags?:      string;
 }
 
+// ________________________ These for AllJobs
 async function fetchJobs(filters: JobFilters) : Promise<PaginatedResponse<Job>> {
 
     const   params = new URLSearchParams();
@@ -28,6 +31,7 @@ async function fetchJobs(filters: JobFilters) : Promise<PaginatedResponse<Job>> 
     if(filters.tags)   params.set('tags', String(filters.tags));
 
     const   { data } = await api.get(`/jobs/${params.toString()}`);
+    console.log('Error in use Jobs: ', data);
     // data = { data: Job[], meta: { total, page, limit, totalPages } }
     return data;
 }
@@ -41,5 +45,22 @@ export  function useJobs(filters: JobFilters = {}) {
         placeholderData: (prev) => prev
     //  keep previous page visible while next page loads
     // prevents content flash between page changes
+    })
+}
+
+// ___________________ For Job/:id
+
+async function fetchJob(id: string) : Promise<Job> {
+    const   { data } = await api.get(`/jobs/${id}`);
+    return data.data;
+}
+
+export  function useJob(id: string | undefined) {
+
+    return useQuery({
+        queryKey: ['job', id],
+        queryFn: () => fetchJob(id!),
+        enabled: !!id, // don't fetch if id = undefined
+        staleTime: 1000 * 60 * 5
     })
 }

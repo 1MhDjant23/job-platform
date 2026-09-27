@@ -7,16 +7,19 @@ import {
     Param,
     Delete,
     Get,
-    ParseUUIDPipe
+    ParseUUIDPipe,
+    Query
 } from '@nestjs/common';
-import { CreateJobDto, UpdateJobDto } from './dto/jobs.dto';
+import { CreateJobDto, GetJobsQueryDto, UpdateJobDto } from './dto/jobs.dto';
 import { Roles } from 'src/common/decorators/roles.decorator';
-import { JobStatus, JobType, Role } from '@prisma/client';
+import { Jobs, JobStatus, JobType, Role } from '@prisma/client';
 import { JwtAccessGuard } from 'src/auth/guards/jwt-access.guards';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import type { CurrentUserPayload } from 'src/common/types/users.types';
 import { JobsService } from './jobs.service';
+import { PaginatedResponse } from 'src/common/interfaces/globale.response.types';
+import { Job } from './jobs.types';
 
 @Controller('jobs')
 export class JobsController {
@@ -60,8 +63,8 @@ export class JobsController {
     }
     /*******    *********** ******** */
     @Get()
-    getJobs() {
-        return this.jobService.allJobs();
+    getJobs(@Query() query: GetJobsQueryDto): Promise<PaginatedResponse<Job> > {
+        return this.jobService.allJobs(query);
     }
     /*******    *********** ******** */
     @Get(':id') // get a single job by ID

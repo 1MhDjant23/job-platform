@@ -75,7 +75,7 @@ export  function JobListingPage() {
                     </h1>
                     {!isLoading && data && (
                         <p className="text-sm text-gray-500 mt-1">
-                        {data.meta.total} jobs available
+                        {data.meta?.total} jobs available
                         </p>
                     )}
                 </div>
@@ -139,8 +139,8 @@ export  function JobListingPage() {
                 />
                 )}
                 {/* state 3: Empty */}
-                {!isLoading && !isError && data?.data.length === 0 && (
-                <EmptyState hasFilters={hasFilters} onClear={clearFilters} />
+                {!isLoading && !isError && data?.data?.length === 0 && (
+                    <EmptyState hasFilters={hasFilters} onClear={clearFilters} />
                 )}
                 {/* stat 4: Success */}
                 {!isLoading && !isError && data && data.data.length > 0 && (
@@ -158,9 +158,7 @@ export  function JobListingPage() {
                         />
                     </>
                 )}
-
             </div>
-
         </div>
     );
 }
