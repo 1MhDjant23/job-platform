@@ -1,9 +1,6 @@
-import { useQuery } from "@tanstack/react-query";
-import type { Job, PaginatedResponse } from "../types";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import type { Job, PaginatedResponse } from "@job-platform/contracts";
 import { api } from "../lib/axios";
-import { id } from "zod/v4/locales";
-import { string } from "zod/v4";
-// import { URLSearchParams } from "url";
 
 
 export interface JobFilters {
@@ -62,5 +59,31 @@ export  function useJob(id: string | undefined) {
         queryFn: () => fetchJob(id!),
         enabled: !!id, // don't fetch if id = undefined
         staleTime: 1000 * 60 * 5
+    })
+}
+
+// ___________ For Dashboard
+
+export  function useMyJobs() {
+    return useQuery({
+        queryKey: ['jobs', 'mine'],
+        queryFn: async () => {
+            const   { data } = await api.get('/jobs/mine');
+            return data.data as Job[];
+        }
+    })
+}
+
+export  function  useDeleteJob() {
+    const   queryClient = useQueryClient();
+
+    useMutation({
+        mutationFn: (id: string) =>
+            api.delete(`/jobs/${id}`).then(r => r.data),
+        onSuccess: () => {
+            // invalidating both, public lists and employer list
+            queryClient.invalidateQueries({ queryKey: ['jobs', 'mine'] });
+            queryClient.invalidateQueries( {queryKey: ['jobs']} );
+        }
     })
 }

@@ -14,13 +14,14 @@ import {
     BadRequestException
  } from '@nestjs/common';
 import { CreateCompanyDto, UpdateCompanyDto } from './dto/create-company.dto';
-import { CompaniesService } from './companies.service';
+import { CompaniesService, Company } from './companies.service';
 import { JwtAccessGuard } from 'src/auth/guards/jwt-access.guards';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import type { CurrentUserPayload } from 'src/common/types/users.types';
 import { Roles } from 'src/common/decorators/roles.decorator';
 import { Role } from '@prisma/client';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
+import { ApiResponse } from 'src/common/interfaces/globale.response.types';
 // import { FileInterceptor } from '@nestjs/platform-express';
 // import { Multer } from 'multer';
 
@@ -33,16 +34,24 @@ export class CompaniesController {
     @Post()
     @Roles(Role.Employer)
     @UseGuards(JwtAccessGuard, RolesGuard)
-    async createCompany(@CurrentUser() user: CurrentUserPayload, @Body() creatCompany: CreateCompanyDto) {
-        return await this.companyService.create(user.userId, creatCompany);
+    async createCompany(@CurrentUser() user: CurrentUserPayload, @Body() creatCompany: CreateCompanyDto) : Promise<ApiResponse<Company>> {
+        const createdCompany = await this.companyService.create(user.userId, creatCompany);
+        
+        return {
+            data: createdCompany
+        };
     }
 /*******    *********** ******** */
     // Update Company 
     @Patch()
     @Roles(Role.Employer)
     @UseGuards(JwtAccessGuard, RolesGuard)
-    async updateCompany(@Body() updatePayload: UpdateCompanyDto , @CurrentUser() user: CurrentUserPayload) {
-        return await this.companyService.update(updatePayload, user.userId);
+    async updateCompany(@Body() updatePayload: UpdateCompanyDto , @CurrentUser() user: CurrentUserPayload) : Promise<ApiResponse<Company>> {
+        const updatedCompany = await this.companyService.update(updatePayload, user.userId);
+        
+        return {
+            data: updatedCompany
+        }
     }
 
 /*******    *********** ******** */

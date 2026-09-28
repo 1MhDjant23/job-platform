@@ -6,6 +6,15 @@ import {
 }   from    '@nestjs/common';
 import { UploadService } from 'src/upload/upload.service';
 
+export interface Company {
+    id:          string;
+    name:        string;
+    description: string | null;
+    location:    string | null;
+    website:     string | null;
+    logoUrl:     string | null;
+    ownerId:     string;
+}
 
 @Injectable()
 export class CompaniesService {
@@ -16,21 +25,28 @@ export class CompaniesService {
 /*******    *********** ******** */
 /**         CREATE-COMPANY       */
 /*******    *********** ******** */
-    async   create(userId: string, dto: CreateCompanyDto) {
+    async   create(userId: string, dto: CreateCompanyDto) : Promise<Company> {
         const   existing = await this.findCompanyByOwnerId(userId); // one employer = one company
         if(existing) {
             throw new ConflictException('You already have a company profile');
         }
         return await this.prisma.company.create({
             data: {...dto, ownerId: userId},
-            include: { owner: { select: { id: true, email: true, firstName: true } } }
+            select: {
+                id: true,
+                name: true,
+                description: true,
+                location: true,
+                website: true,
+                logoUrl: true,
+                ownerId: true
+            }
         });
     }
 /*******    *********** ******** */
 /**         UPDATE-COMPANY       */
 /*******    *********** ******** */
-    async update(updatePayload: UpdateCompanyDto, ownerId: string) {
-        // console.log("++++++++: ", Object.values(updatePayload).length);
+    async update(updatePayload: UpdateCompanyDto, ownerId: string): Promise<Company> {
         // if(Object.keys(updatePayload).length === 0) {
         //     throw new BadRequestException('At least one company field is required');
         // }
@@ -44,7 +60,16 @@ export class CompaniesService {
         }
         return await this.prisma.company.update({
             where: {id: company.id},
-            data: updatePayload
+            data: updatePayload,
+            select: {
+                id: true,
+                name: true,
+                description: true,
+                location: true,
+                website: true,
+                logoUrl: true,
+                ownerId: true
+            }
         });
     }
 /*******    *********** ******** */

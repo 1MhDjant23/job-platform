@@ -4,7 +4,6 @@ import { CompaniesService } from 'src/companies/companies.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Company, JobStatus, JobType, Prisma } from '@prisma/client';
 import { ApplicationsService } from 'src/applications/applications.service';
-import { title } from 'process';
 
 @Injectable()
 export class JobsService {
