@@ -1,6 +1,7 @@
 import { PartialType } from "@nestjs/swagger"
 import { JobStatus, JobType } from "@prisma/client"
-import { IsDate, IsEnum, IsInt, IsOptional, IsString, IsUUID, MaxLength, MinLength } from "class-validator"
+import { Type } from "class-transformer"
+import { IsDate, IsEnum, IsIn, IsInt, IsOptional, IsString, IsUUID, Max, MaxLength, Min, MinLength } from "class-validator"
 
 export  class   CreateJobDto {
     @IsString()
@@ -35,3 +36,30 @@ export  class   CreateJobDto {
 }
 
 export  class UpdateJobDto extends PartialType(CreateJobDto) {}
+
+export class GetJobsQueryDto {
+    @IsOptional()
+    @IsString()
+    search?: string;
+
+    @IsOptional()
+    @IsEnum(JobStatus)
+    status?: JobStatus;
+
+    @IsOptional()
+    @IsEnum(JobType)
+    type?: JobType;
+
+    @IsOptional()
+    @Type(() => Number)
+    @IsInt()
+    @Min(1)
+    page = 1;
+
+    @IsOptional()
+    @Type(() => Number)
+    @IsInt()
+    @Min(1)
+    @Max(100)
+    limit = 20;
+}

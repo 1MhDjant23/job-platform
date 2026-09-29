@@ -20,9 +20,12 @@ model User {
   passwordHash  String
   createdAt     DateTime @default(now()) @db.Timestamptz()
   updatedAt     DateTime @default(now()) @db.Timestamptz()
+  resumUrl      String?
+  avatarUrl     String?
+
   role          Role @default(Public)
   refreshTokens RefreshToken[]
-
+  applications  Application[]
   company       Company?
 }
 
@@ -65,12 +68,32 @@ model Jobs {
   salaryMin   Int?
   salaryMax   Int?
   companyId   String
-  status      JobStatus @default(OPEN)
-  type        JobType   @default(FULL_TIME)
   createdAt   DateTime  @default(now()) @db.Timestamptz()
   expiresAt   DateTime?
   updatedAt   DateTime  @default(now()) @db.Timestamptz()
+  status      JobStatus @default(OPEN)
+  type        JobType   @default(FULL_TIME)
+  tags        JobTags[]
+  applicants  Application[]
+
   company     Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+}
+
+model Tags {
+  id    String @id  @default(uuid())
+  name  String  @unique
+
+  jobs  JobTags[]
+}
+
+model JobTags {
+  jobId String
+  tagId String
+
+  job   Jobs  @relation(fields: [jobId], references: [id])
+  tag  Tags  @relation(fields: [tagId], references: [id])
+
+  @@id([jobId, tagId])
 }
 
 enum JobStatus {
@@ -84,4 +107,25 @@ enum  JobType {
   CONTRACT
   INTERNSHIP
   REMOTE
+}
+
+model Application {
+  id  String  @id @unique @default(uuid())
+  status      ApplicationStatus @default(Applied)
+  coverLeter  String? @db.Text
+  appliedAt DateTime  @default(now()) @db.Timestamptz()
+
+  // -- relations
+  jobId String
+  applicantId String
+
+  applicant User  @relation(fields: [applicantId], references: [id], onDelete: Cascade)
+  job Jobs  @relation(fields: [jobId], references: [id])
+}
+
+enum ApplicationStatus {
+  Applied
+  Reviewd
+  Accepted
+  Rejected
 }

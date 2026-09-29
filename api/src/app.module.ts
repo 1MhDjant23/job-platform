@@ -7,6 +7,8 @@ import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
 import { CompaniesModule } from './companies/companies.module';
 import { UploadModule } from './upload/upload.module';
+import { TagsModule } from './tags/tags.module';
+import { JobsModule } from './jobs/jobs.module';
 
 @Module({
   imports: [
@@ -26,7 +28,9 @@ import { UploadModule } from './upload/upload.module';
     UsersModule,
     AuthModule,
     CompaniesModule,
-    UploadModule
+    JobsModule,
+    UploadModule,
+    TagsModule
   ],
 
 })

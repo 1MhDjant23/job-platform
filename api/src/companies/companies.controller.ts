@@ -7,36 +7,55 @@ import {
     Param,
     Delete,
     Put,
-    Patch
+    UseInterceptors,
+    Patch,
+    ParseUUIDPipe,
+    UploadedFile,
+    BadRequestException
  } from '@nestjs/common';
 import { CreateCompanyDto, UpdateCompanyDto } from './dto/create-company.dto';
-import { CompaniesService } from './companies.service';
+import { CompaniesService, Company } from './companies.service';
 import { JwtAccessGuard } from 'src/auth/guards/jwt-access.guards';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import type { CurrentUserPayload } from 'src/common/types/users.types';
 import { Roles } from 'src/common/decorators/roles.decorator';
 import { Role } from '@prisma/client';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
+import { ApiResponse } from 'src/common/interfaces/globale.response.types';
+// import { FileInterceptor } from '@nestjs/platform-express';
+// import { Multer } from 'multer';
 
 @Controller('companies')
 export class CompaniesController {
     constructor(private readonly companyService: CompaniesService) {}
     
+/*******    *********** ******** */
+    // Create Company
     @Post()
     @Roles(Role.Employer)
     @UseGuards(JwtAccessGuard, RolesGuard)
-    async createCompany(@CurrentUser() user: CurrentUserPayload, @Body() creatCompany: CreateCompanyDto) {
-        return await this.companyService.create(user.userId, creatCompany);
+    async createCompany(@CurrentUser() user: CurrentUserPayload, @Body() creatCompany: CreateCompanyDto) : Promise<ApiResponse<Company>> {
+        const createdCompany = await this.companyService.create(user.userId, creatCompany);
+        
+        return {
+            data: createdCompany
+        };
     }
 /*******    *********** ******** */
+    // Update Company 
     @Patch()
     @Roles(Role.Employer)
     @UseGuards(JwtAccessGuard, RolesGuard)
-    async updateCompany(@Body() updatePayload: UpdateCompanyDto , @CurrentUser() user: CurrentUserPayload) {
-        return await this.companyService.update(updatePayload, user.userId);
+    async updateCompany(@Body() updatePayload: UpdateCompanyDto , @CurrentUser() user: CurrentUserPayload) : Promise<ApiResponse<Company>> {
+        const updatedCompany = await this.companyService.update(updatePayload, user.userId);
+        
+        return {
+            data: updatedCompany
+        }
     }
 
 /*******    *********** ******** */
+    // Get employer company
     @Get('me')
     @Roles(Role.Employer)
     @UseGuards(JwtAccessGuard, RolesGuard)
@@ -44,7 +63,7 @@ export class CompaniesController {
         return this.companyService.findCompanyByOwnerId(user.userId);
     }
 /*******    *********** ******** */
-
+    // Delete company
     @Delete('me')
     @Roles(Role.Employer)
     @UseGuards(JwtAccessGuard, RolesGuard)
@@ -52,23 +71,34 @@ export class CompaniesController {
         return await this.companyService.deleteCompany(user.userId);
     }
 /*******    *********** ******** */
+    // Get Company by ID, public
     @Get(':id')
     async getCompany(@Param('id') companyId: string) {
         return await this.companyService.getCompanyId(companyId);
     }
 /*******    *********** ******** */
+    // Admin approve a company
     @Patch(':id/approve')
     @Roles(Role.Admin)
     @UseGuards(JwtAccessGuard, RolesGuard)
-    approveCompany(@Param() id: string) {
+    approveCompany(@Param('id', ParseUUIDPipe) id: string) {
         return this.companyService.approve(id);
     }
 /*******    *********** ******** */
-    @Post('me/logo')
-    @Roles(Role.Employer)
-    @UseGuards(JwtAccessGuard, RolesGuard)
-    async uploadLogo() {
-        return "Logo of company";
-    }
+    // Upload logo
+    // @Post('me/logo')
+    // @Roles(Role.Employer)
+    // @UseGuards(JwtAccessGuard, RolesGuard)
+    // uploadLogo(
+    //     @CurrentUser() user: CurrentUserPayload
+    // ) {
+    //     console.log("----------------------");
+    //     if(!file)
+    //     {
+    //         throw new BadRequestException("upload a logo");
+    //     }
+    //     console.log(file)
+    //     return "Logo of company";
+    // }
 
 }

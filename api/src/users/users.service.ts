@@ -1,18 +1,20 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import bcrypt      from 'bcrypt';
-import { RefreshToken, Role } from '@prisma/client';
+import { RefreshToken, Role, User } from '@prisma/client';
+import { UpdateUserDto } from './dto/users.dto';
+import { ValidatedUser } from 'src/auth/auth.service';
 
-interface User {
-    id: string
-    email: string
-    passwordHash: string
-    firstName: string
-    createdAt: Date
-    lastName: string
-    role: Role
-    updatedAt: Date
-}
+// interface User {
+//     id: string
+//     email: string
+//     passwordHash: string
+//     firstName: string
+//     createdAt: Date
+//     lastName: string
+//     role: Role
+//     updatedAt: Date
+// }
 
 export interface   SignUpUser {
     firstName: string
@@ -26,6 +28,11 @@ export interface   SignUpUser {
 export class UsersService {
     constructor(private readonly prisma: PrismaService) {}
 /*******    *********** ******** */
+    async update(userId: string, dto: UpdateUserDto) {
+        
+
+    }
+/*******    *********** ******** */
     async findUserByEmail(email: string) : Promise<User | null> {
         console.log("Email from user service: ", email);
         return await this.prisma.user.findUnique({
@@ -33,7 +40,7 @@ export class UsersService {
         });
     }
 /*******    *********** ******** */
-    async findUserById(userId: string) : Promise<User& {refreshTokens: RefreshToken[]} | null> {
+    async findUserById(userId: string) : Promise<ValidatedUser& {refreshTokens: RefreshToken[]} | null> {
         return await this.prisma.user.findUnique({
             where: { id: userId },
             include: {refreshTokens: true}
@@ -51,6 +58,30 @@ export class UsersService {
             }
         });
     }
+/*******    *********** ******** */
+    async allUsers() {
+        return await this.prisma.user.findMany({
+            where: {
+                role: { not: Role.Admin }
+            },
+            select: {
+                id: true, email: true,
+                firstName: true, lastName: true,
+                createdAt: true, updatedAt: true,
+                role: true
+            }
+        });
+    }
+/*******    *********** ******** */
+    async delete(userId: string) {
+
+        return await this.prisma.user.delete({
+            where: { id: userId },
+            select: { id: true }
+        })
+    }
+
+
     // Get All users
     // async findAll() {
     //     return this.prisma.user.findMany({

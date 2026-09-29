@@ -4,14 +4,22 @@ import  bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { Role } from '@prisma/client';
+import { Role, User } from '@prisma/client';
 import { RefreshPayload } from './auth.controller';
 
 type AuthInput = {email: string, password: string};
-type AuthResult = {accessToken: string, refreshToken: string, user: User};
-type Validated = {userId: string, email: string, role: Role };
+type AuthResult = {accessToken: string, refreshToken: string, user: ValidatedUser};
+export type ValidatedUser = Omit<User, 'passwordHash'|'updatedAt'> ; // validated user without password
 type GenerateTokensResult = { accessToken: string, refreshToken: string };
-type User = { userId: string, email: string, role: Role };
+// type User = {
+//     id: string,
+//     email: string,
+//     firstname: string,
+//     lastname: string,
+//     role: Role,
+//     avatarUrl: string | null
+//     resumeUrl: string
+// };
 
 
 @Injectable()
@@ -33,11 +41,12 @@ export class AuthService {
         if(!user) {
             throw new UnauthorizedException('Unauthorization: email or password dosen\'t match.');
         }
-        const   { accessToken, refreshToken } = await this.generateTokens(user.userId, user.role);
+        console.log("User Valid");
+        const   { accessToken, refreshToken } = await this.generateTokens(user.id, user.role);
         // Stoore the hashed refresh-token in DB 
-        await this.storeRefreshToken({ refreshToken: refreshToken, userId: user.userId });
+        await this.storeRefreshToken({ refreshToken: refreshToken, userId: user.id });
         return {
-            user: { userId: user.userId, email: user.email, role: user.role },
+            user:  user,
             accessToken: accessToken,
             refreshToken: refreshToken
         }
@@ -59,7 +68,7 @@ export class AuthService {
         }
     }
 /*******    *********** ******** */
-    async validateUser(input: AuthInput) : Promise<Validated | null> {
+    async validateUser(input: AuthInput) : Promise<ValidatedUser | null> {
         const   userMatch = await this.userService.findUserByEmail(input.email);
         if(!userMatch) {
             return null;
@@ -70,8 +79,13 @@ export class AuthService {
             return null;
         }
         return {
-            userId: userMatch.id,
+            id: userMatch.id,
             email: userMatch.email,
+            firstName: userMatch.firstName,
+            lastName: userMatch.lastName,
+            createdAt: userMatch.createdAt,
+            resumUrl: userMatch.resumUrl,
+            avatarUrl: userMatch.avatarUrl,
             role: userMatch.role
         }
     }
@@ -104,9 +118,21 @@ export class AuthService {
 /**         REFRESH PART         */
 /*******    *********** ******** */
     async refresh(refreshPayload: RefreshPayload) {
-        await this.prisma.refreshToken.update({
+        const user = await this.prisma.refreshToken.update({
             where: { id: refreshPayload.refreshTokenId },
-            data: { revoked: true,  }
+            data: { revoked: true,  },
+            select: {
+                user: {
+                    select: {
+                        id: true,
+                        email: true,
+                        firstName: true,
+                        lastName: true,
+                        role: true,
+                        resumUrl: true
+                    }
+                }
+            }
         });
 
         const   { accessToken, refreshToken } = await this.generateTokens(refreshPayload.userId, refreshPayload.role);
@@ -114,7 +140,7 @@ export class AuthService {
         return {
             accessToken: accessToken,
             refreshToken: refreshToken,
-            role: refreshPayload.role
+            user
         }
     }
 }

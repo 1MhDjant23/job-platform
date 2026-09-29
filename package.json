@@ -1,0 +1,9 @@
+{
+    "name": "job-platform",
+    "private": true,
+    "workspaces":[
+        "api",
+        "web",
+        "packages/*"
+    ]
+}
