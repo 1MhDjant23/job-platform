@@ -1,6 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { Job, PaginatedResponse } from "@job-platform/contracts";
 import { api } from "../lib/axios";
+import { useNavigate } from "react-router-dom";
+import type { CreateJobFormData } from "../lib/validations/job.schema";
 
 
 export interface JobFilters {
@@ -77,7 +79,7 @@ export  function useMyJobs() {
 export  function  useDeleteJob() {
     const   queryClient = useQueryClient();
 
-    useMutation({
+    return useMutation({
         mutationFn: (id: string) =>
             api.delete(`/jobs/${id}`).then(r => r.data),
         onSuccess: () => {
@@ -86,4 +88,21 @@ export  function  useDeleteJob() {
             queryClient.invalidateQueries( {queryKey: ['jobs']} );
         }
     })
+}
+
+export function usePostJob() {
+    const   queryClient = useQueryClient();
+    const   navigate = useNavigate();
+
+    return useMutation({
+        mutationFn: async (dto: CreateJobFormData) => {
+            const   { data } = await api.post('/jobs', dto);
+            return data.data as Job;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['jobs', 'mine'] });
+            queryClient.invalidateQueries({ queryKey: ['jobs'] });
+            navigate('/dashboard');
+        }
+    });
 }

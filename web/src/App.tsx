@@ -6,6 +6,7 @@ import { JobListingPage } from "./pages/jobs/JobListingPage";
 import JobDetailPage from "./pages/jobs/JobDetailPage";
 import { SetupCompanyPage } from "./pages/dashboard/SetupCompanyPage";
 import { EmployerDashboard } from "./pages/dashboard/EmployerDashboard";
+import PostJobPage from "./pages/dashboard/PostJobPage";
 
 function App() {
   return (
@@ -18,6 +19,8 @@ function App() {
       <Route element={<ProtectedRoute allowedRoles={["EMPLOYER"]} />}>
         <Route path="/setup-company" element={<SetupCompanyPage />} />
         <Route path="/dashboard" element={<EmployerDashboard />} />
+        <Route path="/post-job" element={<PostJobPage />} />
+
         <Route path="/" element={<p>Home Page</p>}/>
       </Route>
     </Routes>

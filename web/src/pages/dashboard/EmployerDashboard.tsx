@@ -2,7 +2,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Skeleton } from "../../components/ui/Skeleton";
 import { useState } from "react";
 import type { Job } from "@job-platform/contracts";
-import type { useMyCompany } from "../../hooks/useCompany";
+import { useMyCompany } from "../../hooks/useCompany";
 import { useDeleteJob, useMyJobs } from "../../hooks/useJobs";
 import { Button } from "../../components/ui/Button";
 import { ErrorState } from "../../components/ui/ErrorState";
