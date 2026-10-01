@@ -1,9 +1,12 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useJob } from "../../hooks/useJobs";
 import { ErrorState } from "../../components/ui/ErrorState";
 import { Skeleton } from "../../components/ui/Skeleton";
 import { useAuth } from "../../contexts/auth/AuthContext";
-import type { Job } from "../../types";
+import type { Job } from "@job-platform/contracts";
+import { useState } from "react";
+import { ApplyModal } from "../../components/jobs/ApplyModal";
 
 // ── Helpers ____
 const JOB_TYPE_LABELS: Record<string, string> = {
@@ -34,6 +37,8 @@ function formatDate(dateStr: string): string {
 function ApplyButton({ job }: { job: Job }) {
     const { user } = useAuth();
     const navigate = useNavigate();
+    
+    const   [open, setOpen] = useState<boolean>(false);
 
     // Not logged in → go to register
     if (!user) {
@@ -60,13 +65,21 @@ function ApplyButton({ job }: { job: Job }) {
 
     // Job seeker; show apply button
     return (
-        <button
-        onClick={() => navigate(`/jobs/${job.id}/apply`)}
-        className="w-full py-3 bg-blue-600 text-white font-medium
-                    rounded-lg hover:bg-blue-700 transition-colors"
-        >
-            Apply now
-        </button>
+        <>
+            <button
+                onClick={() => setOpen(true)}
+                className="w-full py-3 bg-blue-600 text-white font-medium
+                   rounded-lg hover:bg-blue-700 transition-colors"
+            >
+                Apply now
+            </button>
+            {open && (
+                <ApplyModal
+                    job={job}
+                    onClose={() => setOpen(false)}
+                />
+            )}
+        </>
     );
 }
 

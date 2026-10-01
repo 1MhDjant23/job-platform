@@ -1,7 +1,6 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { User } from "../../types";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import type { User } from "@job-platform/contracts";
 import { api, setAccessToken } from "../../lib/axios";
-// import { data, useNavigate } from "react-router-dom";
 import { AuthContext } from "./AuthContext";
 import type { RegisterFormData } from "../../lib/validations/auth.schema";
 
@@ -15,22 +14,12 @@ export interface AuthContextValue { // what exposed to every comp
     logout:     () => Promise<void>
 }
 
-// interface   RegisterPayload {
-//     firstname: string,
-//     lastname: string,
-//     email: string,
-//     password: string,
-//     role: 'JOB_SEEKER' | 'EMPLOYER'
-// }
-
 export  function AuthProvider({ children } : { children: React.ReactNode }) {
     const   [user, setUser] = useState<User|null>(null);
     const   [isLoading, setIsLoading] = useState<boolean>(true);
 
     // runs once when the app loads
-    const   counter = useRef(0);
     useEffect(() => {
-        console.log("restore session Runed: ", counter.current++);
         const   restorSession = async () => {
             try {
                 const   {data} = await api
@@ -54,7 +43,7 @@ export  function AuthProvider({ children } : { children: React.ReactNode }) {
     // const   navigate = useNavigate();
     const   login = useCallback(async (email: string, password: string) => {
         const   { data } = await api
-            .post<{data: {accessToken: string, user: User}}>
+            .post<{data: { accessToken: string, user: User }}>
             ('/auth/login', {email, password}, { withCredentials: true });
         setAccessToken(data.data.accessToken);
         console.log("access Token In Login: ", data.data.accessToken);

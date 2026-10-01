@@ -3,12 +3,10 @@ import {
         Post, 
         Body,
         UseGuards,
-        NotImplementedException, 
         HttpStatus, 
         HttpCode,
         Get,
         Res,
-        Req,
         } from '@nestjs/common';
 import type { Response } from 'express';
 import { AuthService } from './auth.service';
@@ -16,7 +14,6 @@ import { LoginDto, signUpDto } from './dto/auth.dto';
 import { ConfigService } from '@nestjs/config';
 import { JwtRefreshGuard } from './guards/jwt-refresh.guards';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
-import { CurrentUserPayload } from 'src/common/types/users.types';
 import { Role } from '@prisma/client';
 
 export type    RefreshPayload = { userId: string, refreshTokenId: string, role: Role };

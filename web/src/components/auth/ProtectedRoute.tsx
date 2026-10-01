@@ -1,6 +1,6 @@
 import { Navigate, Outlet } from "react-router-dom";
 import { useAuth } from "../../contexts/auth/AuthContext";
-import type { ROLE } from "../../types";
+import type { ROLE } from "@job-platform/contracts";
 
 interface Props {
     allowedRoles?: ROLE

@@ -4,22 +4,15 @@ import  bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { Role, User } from '@prisma/client';
+import { Role } from '@prisma/client';
+import  { User }    from    '@job-platform/contracts';
 import { RefreshPayload } from './auth.controller';
 
 type AuthInput = {email: string, password: string};
-type AuthResult = {accessToken: string, refreshToken: string, user: ValidatedUser};
-export type ValidatedUser = Omit<User, 'passwordHash'|'updatedAt'> ; // validated user without password
+type AuthResult = {accessToken: string, refreshToken: string, user: User};
+// export type ValidatedUser = Omit<User, 'passwordHash'|'updatedAt'> ; // validated user without password
+
 type GenerateTokensResult = { accessToken: string, refreshToken: string };
-// type User = {
-//     id: string,
-//     email: string,
-//     firstname: string,
-//     lastname: string,
-//     role: Role,
-//     avatarUrl: string | null
-//     resumeUrl: string
-// };
 
 
 @Injectable()
@@ -37,11 +30,10 @@ export class AuthService {
 /*******    *********** ******** */
 
     async authenticate(input: AuthInput) : Promise<AuthResult> {
-        const   user = await this.validateUser(input);
+        const   user: User = await this.validateUser(input);
         if(!user) {
             throw new UnauthorizedException('Unauthorization: email or password dosen\'t match.');
         }
-        console.log("User Valid");
         const   { accessToken, refreshToken } = await this.generateTokens(user.id, user.role);
         // Stoore the hashed refresh-token in DB 
         await this.storeRefreshToken({ refreshToken: refreshToken, userId: user.id });
@@ -68,7 +60,7 @@ export class AuthService {
         }
     }
 /*******    *********** ******** */
-    async validateUser(input: AuthInput) : Promise<ValidatedUser | null> {
+    async validateUser(input: AuthInput) : Promise<User | null> {
         const   userMatch = await this.userService.findUserByEmail(input.email);
         if(!userMatch) {
             return null;
@@ -83,7 +75,6 @@ export class AuthService {
             email: userMatch.email,
             firstName: userMatch.firstName,
             lastName: userMatch.lastName,
-            createdAt: userMatch.createdAt,
             resumUrl: userMatch.resumUrl,
             avatarUrl: userMatch.avatarUrl,
             role: userMatch.role
@@ -111,7 +102,6 @@ export class AuthService {
         }
         const   hashPassword = await bcrypt.hash(input.password, 10);
         await this.userService.create({...input, password: hashPassword});
-        console.log("----------> USER CREATED -------------");
     }
 /*******    *********** ******** */
 /*******    *********** ******** */

@@ -15,9 +15,6 @@ export  class LoginDto {
     @IsString()
     @IsNotEmpty()
     password!: string
-
-    // @IsEnum(Role)
-    // role!:   Role
 }
 /*******    *********** ******** */
 export  class   signUpDto {

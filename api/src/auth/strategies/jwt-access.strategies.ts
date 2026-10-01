@@ -14,7 +14,6 @@ export class    JwtAccessStrategy extends PassportStrategy(Strategy, 'accessToke
         });
     }
     async validate(payload: { sub: string, type: string, role: Role }) {
-        console.log("=======================================::::");
         return {
             userId: payload.sub, 
             type: payload.type,
