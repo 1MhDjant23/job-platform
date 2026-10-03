@@ -8,6 +8,8 @@ import { Application, ApplicationStatus } from '@prisma/client';
 import { CompaniesService } from 'src/companies/companies.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { ApplyToJobDto } from './dto/apply.to.job.dto';
+import type { Application as PublicApplication } from '@job-platform/contracts';
+import { publicApplicationSelect, toPublicApplication } from './mappers/application.mapper';
 
 @Injectable()
 export class ApplicationsService {
@@ -47,28 +49,22 @@ export class ApplicationsService {
     /*******    *********** ******** */
     //          As JobSeeker 
     /*******    *********** ******** */
-    async   findApplications(jobSeekerId: string) {
-        return await this.prisma.user.findUnique({
+    async findApplications(jobSeekerId: string) {
+        const user = await this.prisma.user.findUnique({
             where: { id:  jobSeekerId },
             select: {
                 applications: {
-                    include: {
-                        job: { select: {
-                                id: true,
-                                title: true,
-                                createdAt: true,
-                                status: true,
-                                type: true,
-                                tags: true
-                                }
-                            }
+                    select: publicApplicationSelect,
+                    orderBy: {
+                        appliedAt: 'desc',
                     }
                 }
             }
         });
+        return user?.applications.map(toPublicApplication) ?? [];
     }
     /*******    *********** ******** */
-    async apply(applyData: ApplyToJobDto, jobSeekerId: string) {
+    async apply(applyData: ApplyToJobDto, jobSeekerId: string): Promise<PublicApplication> {
         const   exist = await this.prisma.jobs.findUnique({
             where: { id: applyData.jobId },
             select: {
@@ -87,11 +83,12 @@ export class ApplicationsService {
         }
         return await this.prisma.application.create({
             data: {
-                coverLeter: applyData.coverLettre,
+                coverLeter: applyData.coverLetter,
                 jobId: applyData.jobId,
                 applicantId: jobSeekerId
-            }
-        });
+            },
+            select: publicApplicationSelect,
+        }).then(toPublicApplication);
     }
     /*******    *********** ******** */
     async delete(appId: string, jobSeekerId: string) {

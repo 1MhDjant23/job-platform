@@ -1,16 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "../lib/axios";
 import { useNavigate } from "react-router-dom";
+import type { Company, CreateCompany } from "@job-platform/contracts";
 
-export interface Company {
-    id:          string;
-    name:        string;
-    description: string | null;
-    location:    string | null;
-    website:     string | null;
-    logoUrl:     string | null;
-    ownerId:     string;
-}
 
 export interface CreateCompanyDto {
     name:         string;
@@ -41,7 +33,7 @@ export function useCreateCompany() {
     return useMutation({
         mutationFn: async (dto: CreateCompanyDto) => {
             const   { data } = await api.post('/companies', dto);
-            return data.data as Company;
+            return data.data as CreateCompany;
         },
         onSuccess: (newCompany) => {
 

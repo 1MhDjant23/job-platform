@@ -7,5 +7,5 @@ export  class ApplyToJobDto {
 
     @IsOptional()
     @IsString()
-    coverLettre!: string
+    coverLetter!: string
 }

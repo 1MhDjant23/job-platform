@@ -1,4 +1,4 @@
-import type { Company, JobType } from './index';
+import type { Company, JobType } from './index.js';
 
 
 export type ApplicationStatus = 'PENDING' | 'REVIEWED' | 'ACCEPTED' | 'REJECTED';

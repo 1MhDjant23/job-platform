@@ -20,7 +20,7 @@ model User {
   passwordHash  String
   createdAt     DateTime @default(now()) @db.Timestamptz()
   updatedAt     DateTime @default(now()) @db.Timestamptz()
-  resumUrl      String?
+  resumeUrl      String?
   avatarUrl     String?
 
   role          Role @default(Public)

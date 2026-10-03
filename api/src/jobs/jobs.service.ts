@@ -4,6 +4,7 @@ import { CompaniesService } from 'src/companies/companies.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Company, JobStatus, JobType, Prisma } from '@prisma/client';
 import { ApplicationsService } from 'src/applications/applications.service';
+import { publicJobSelect, toPublicJob } from './mappers/job.mapper';
 
 @Injectable()
 export class JobsService {
@@ -19,8 +20,9 @@ export class JobsService {
             data: {
                 ...dto,
                 companyId: company.id
-            }
-        });
+            },
+            select: publicJobSelect
+        }).then(toPublicJob);
     }
     /*******    *********** ******** */
     async update(dto: UpdateJobDto, ownerId: string, jobId: string) {
@@ -90,28 +92,12 @@ export class JobsService {
                 orderBy: {
                     createdAt: 'desc'
                 },
-                select: {
-                    id: true,
-                    title: true,
-                    status: true,
-                    type: true,
-                    salaryMax: true,
-                    salaryMin: true,
-                    createdAt: true,
-                    company: {
-                        select: {
-                            id: true,
-                            name: true,
-                            location: true,
-                            logoUrl: true
-                        }
-                    }
-                }
+                select: publicJobSelect
             }),
             this.prisma.jobs.count({ where }),
         ]);
         return {
-            data: jobs,
+            data: jobs.map(toPublicJob),
             meta: {
                 total,
                 page,
@@ -123,9 +109,11 @@ export class JobsService {
     }
     /*******    *********** ******** */
     async oneJob(jobId: string) {
-        return await this.prisma.jobs.findUnique({
-            where: { id: jobId }
+        const job = await this.prisma.jobs.findUnique({
+            where: { id: jobId },
+            select: publicJobSelect
         });
+        return job ? toPublicJob(job) : null;
     }
     /*******    *********** ******** */
     async delete(jobId: string, ownerId: string) {
@@ -137,9 +125,11 @@ export class JobsService {
     /*******    *********** ******** */
     async getMine(ownerId: string) {
         const   company = await this.validCompany(ownerId);
-        return this.prisma.jobs.findMany({
-            where: {companyId: company.id}
+        const jobs = await this.prisma.jobs.findMany({
+            where: {companyId: company.id},
+            select: publicJobSelect
         });
+        return jobs.map(toPublicJob);
     }
     /*******    *********** ******** */
     async getApplications(employerId: string, jobId: string) {

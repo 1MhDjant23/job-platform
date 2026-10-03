@@ -5,16 +5,9 @@ import {
     ConflictException
 }   from    '@nestjs/common';
 import { UploadService } from 'src/upload/upload.service';
+import { Company } from '@prisma/client';
 
-export interface Company {
-    id:          string;
-    name:        string;
-    description: string | null;
-    location:    string | null;
-    website:     string | null;
-    logoUrl:     string | null;
-    ownerId:     string;
-}
+
 
 @Injectable()
 export class CompaniesService {
@@ -32,15 +25,12 @@ export class CompaniesService {
         }
         return await this.prisma.company.create({
             data: {...dto, ownerId: userId},
-            select: {
-                id: true,
-                name: true,
-                description: true,
-                location: true,
-                website: true,
-                logoUrl: true,
-                ownerId: true
-            }
+            // select: {
+            //     id: true,
+            //     name: true,
+            //     location: true,
+            //     logoUrl: true
+            // }
         });
     }
 /*******    *********** ******** */
@@ -61,26 +51,35 @@ export class CompaniesService {
         return await this.prisma.company.update({
             where: {id: company.id},
             data: updatePayload,
-            select: {
-                id: true,
-                name: true,
-                description: true,
-                location: true,
-                website: true,
-                logoUrl: true,
-                ownerId: true
-            }
+            // select: {
+            //     id: true,
+            //     name: true,
+            //     description: true,
+            //     location: true,
+            //     website: true,
+            //     logoUrl: true,
+            //     ownerId: true
+            // }
         });
     }
 /*******    *********** ******** */
 
-    async   findCompanyByOwnerId(ownerId: string ) {
+    async   findCompanyByOwnerId(ownerId: string ): Promise<Company> {
         const   exist = await this.prisma.company.findUnique({
-            where: { ownerId: ownerId }
+            where: { ownerId: ownerId },
+            // select: {
+            //     id: true,
+            //     name: true,
+            //     description: true,
+            //     location: true,
+            //     website: true,
+            //     logoUrl: true,
+            //     ownerId: true
+            // }
         });
-        // if(!exist) {
-        //     throw new NotFoundException("You don't have company yet");
-        // }
+        if(!exist) {
+            throw new NotFoundException('Company not found');
+        }
         return exist;
     }
 /*******    *********** ******** */

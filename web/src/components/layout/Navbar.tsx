@@ -28,13 +28,13 @@ export  function Navbar() {
             : 'text-gray-600 hover:text-gray-900';
 
     // links depend on Role
-    const navLinks = user?.role === 'EMPLOYER'
+    const navLinks = user?.role === 'Employer'
         ? [
             { to: '/jobs', label: 'Browse Jobs' },
             { to: '/dashboard', label: 'Dashboard' },
             { to: '/post-job', label: 'Post a Job' },
           ]
-        : user?.role === 'JOB_SEEKER'
+        : user?.role === 'JobSeeker'
         ? [
             { to: '/jobs', label: 'Browse Jobs' },
             { to: '/applications', label: 'My Applications' },
@@ -80,17 +80,17 @@ export  function Navbar() {
                                             {user.avatarUrl ? (
                                                 <img
                                                     src={user.avatarUrl}
-                                                    alt={user.firstname}
+                                                    alt={user.firstName}
                                                     className="w-full h-full object-cover"
                                                 />
                                             ) : (
                                                 <span className="text-xs font-semibold text-blue-600">
-                                                    {user.firstname.charAt(0).toUpperCase()}
+                                                    {user.firstName.charAt(0).toUpperCase()}
                                                 </span>
                                             )}
                                         </div>
                                         <span className="text-sm text-gray-700">
-                                            {user.firstname}
+                                            {user.firstName}
                                         </span>
                                     </div>
                                     {/* Logout  */}
@@ -164,7 +164,7 @@ export  function Navbar() {
                                 {user ? (
                                     <>
                                         <div className="px-2 py-2 text-sm text-gray-500">
-                                            {user.firstname} . {user.role === 'EMPLOYER' ? 'Employer' : 'Job Seeker'}
+                                            {user.firstName} . {user.role === 'Employer' ? 'Employer' : 'Job Seeker'}
                                         </div>
                                         <button
                                             onClick={() => { handleLogout(); setMenuOpen(false); }}

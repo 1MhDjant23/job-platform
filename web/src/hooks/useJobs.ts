@@ -71,6 +71,7 @@ export  function useMyJobs() {
         queryKey: ['jobs', 'mine'],
         queryFn: async () => {
             const   { data } = await api.get('/jobs/mine');
+            console.log('Data in use MyJobs: ', data);
             return data.data as Job[];
         }
     })

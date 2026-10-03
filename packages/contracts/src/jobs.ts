@@ -1,4 +1,4 @@
-import type { Company } from "./company";
+import type { Company } from "./company.js";
 
 export  type JobType = 'FULL_TIME' | 'PART_TIME' | 'CONTRACT' | 'INTERNSHIP' | 'REMOTE';
 export  type JobStatus = 'CLOSED' | 'OPEN' | 'EXPIRED' | 'DRAFT';

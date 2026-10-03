@@ -2,22 +2,23 @@ export  type {
     Job,
     JobType,
     JobStatus
-} from  "./jobs";
+} from  "./jobs.js";
 
 export  type {
     ApiResponse,
     PaginatedResponse
-} from "./common";
+} from "./common.js";
 
 export  type {
-    Company
-} from './company';
+    Company,
+    CreateCompany
+} from './company.js';
 
 export  type {
     Application
-} from './application';
+} from './application.js';
 
 export  type {
     User,
     ROLE
-} from "./user";
+} from "./user.js";

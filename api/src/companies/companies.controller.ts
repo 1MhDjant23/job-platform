@@ -14,7 +14,7 @@ import {
     BadRequestException
  } from '@nestjs/common';
 import { CreateCompanyDto, UpdateCompanyDto } from './dto/create-company.dto';
-import { CompaniesService, Company } from './companies.service';
+import { CompaniesService } from './companies.service';
 import { JwtAccessGuard } from 'src/auth/guards/jwt-access.guards';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import type { CurrentUserPayload } from 'src/common/types/users.types';
@@ -22,8 +22,9 @@ import { Roles } from 'src/common/decorators/roles.decorator';
 import { Role } from '@prisma/client';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { ApiResponse } from 'src/common/interfaces/globale.response.types';
-// import { FileInterceptor } from '@nestjs/platform-express';
-// import { Multer } from 'multer';
+import { Company, CreateCompany } from '@job-platform/contracts';
+import { toPublicCompany } from './mappers/company.mapper';
+
 
 @Controller('companies')
 export class CompaniesController {
@@ -34,11 +35,14 @@ export class CompaniesController {
     @Post()
     @Roles(Role.Employer)
     @UseGuards(JwtAccessGuard, RolesGuard)
-    async createCompany(@CurrentUser() user: CurrentUserPayload, @Body() creatCompany: CreateCompanyDto) : Promise<ApiResponse<Company>> {
+    async createCompany(
+        @CurrentUser() user: CurrentUserPayload, @Body() creatCompany: CreateCompanyDto
+    ) : Promise<ApiResponse<CreateCompany>> {
+
         const createdCompany = await this.companyService.create(user.userId, creatCompany);
         
         return {
-            data: createdCompany
+            data: toPublicCompany(createdCompany)
         };
     }
 /*******    *********** ******** */
@@ -46,21 +50,27 @@ export class CompaniesController {
     @Patch()
     @Roles(Role.Employer)
     @UseGuards(JwtAccessGuard, RolesGuard)
-    async updateCompany(@Body() updatePayload: UpdateCompanyDto , @CurrentUser() user: CurrentUserPayload) : Promise<ApiResponse<Company>> {
+    async updateCompany(
+        @Body() updatePayload: UpdateCompanyDto , @CurrentUser() user: CurrentUserPayload
+    ) : Promise<ApiResponse<Company>> {
         const updatedCompany = await this.companyService.update(updatePayload, user.userId);
         
         return {
-            data: updatedCompany
+            data: toPublicCompany(updatedCompany)
         }
     }
 
 /*******    *********** ******** */
     // Get employer company
-    @Get('me')
+    @Get('mine')
     @Roles(Role.Employer)
     @UseGuards(JwtAccessGuard, RolesGuard)
-    async getOwnCompany(@CurrentUser() user: CurrentUserPayload) {
-        return this.companyService.findCompanyByOwnerId(user.userId);
+    async getOwnCompany(@CurrentUser() user: CurrentUserPayload): Promise<ApiResponse<Company>> {
+
+        // return this.companyService.findCompanyByOwnerId(user.userId);
+        return {
+            data: toPublicCompany(await this.companyService.findCompanyByOwnerId(user.userId))
+        }
     }
 /*******    *********** ******** */
     // Delete company
@@ -68,13 +78,13 @@ export class CompaniesController {
     @Roles(Role.Employer)
     @UseGuards(JwtAccessGuard, RolesGuard)
     async   deleteCompany(@CurrentUser() user: CurrentUserPayload) {
-        return await this.companyService.deleteCompany(user.userId);
+        return toPublicCompany(await this.companyService.deleteCompany(user.userId));
     }
 /*******    *********** ******** */
     // Get Company by ID, public
     @Get(':id')
     async getCompany(@Param('id') companyId: string) {
-        return await this.companyService.getCompanyId(companyId);
+        return toPublicCompany(await this.companyService.getCompanyId(companyId));
     }
 /*******    *********** ******** */
     // Admin approve a company
@@ -82,7 +92,7 @@ export class CompaniesController {
     @Roles(Role.Admin)
     @UseGuards(JwtAccessGuard, RolesGuard)
     approveCompany(@Param('id', ParseUUIDPipe) id: string) {
-        return this.companyService.approve(id);
+        return this.companyService.approve(id).then(toPublicCompany);
     }
 /*******    *********** ******** */
     // Upload logo

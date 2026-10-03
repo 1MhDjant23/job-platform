@@ -4,12 +4,13 @@ import  bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { Role } from '@prisma/client';
-import  { User }    from    '@job-platform/contracts';
+import type { User as PrismaUser, Role } from '@prisma/client';
+import type { User as PublicUser } from '@job-platform/contracts';
 import { RefreshPayload } from './auth.controller';
+import { toPublicUser } from 'src/users/mappers/user.mapper';
 
 type AuthInput = {email: string, password: string};
-type AuthResult = {accessToken: string, refreshToken: string, user: User};
+type AuthResult = {accessToken: string, refreshToken: string, user: PublicUser};
 // export type ValidatedUser = Omit<User, 'passwordHash'|'updatedAt'> ; // validated user without password
 
 type GenerateTokensResult = { accessToken: string, refreshToken: string };
@@ -30,7 +31,7 @@ export class AuthService {
 /*******    *********** ******** */
 
     async authenticate(input: AuthInput) : Promise<AuthResult> {
-        const   user: User = await this.validateUser(input);
+        const user = await this.validateUser(input);
         if(!user) {
             throw new UnauthorizedException('Unauthorization: email or password dosen\'t match.');
         }
@@ -38,7 +39,7 @@ export class AuthService {
         // Stoore the hashed refresh-token in DB 
         await this.storeRefreshToken({ refreshToken: refreshToken, userId: user.id });
         return {
-            user:  user,
+            user: toPublicUser(user),
             accessToken: accessToken,
             refreshToken: refreshToken
         }
@@ -60,7 +61,7 @@ export class AuthService {
         }
     }
 /*******    *********** ******** */
-    async validateUser(input: AuthInput) : Promise<User | null> {
+    async validateUser(input: AuthInput): Promise<PrismaUser | null> {
         const   userMatch = await this.userService.findUserByEmail(input.email);
         if(!userMatch) {
             return null;
@@ -70,15 +71,7 @@ export class AuthService {
         if(!passwordMatch) {
             return null;
         }
-        return {
-            id: userMatch.id,
-            email: userMatch.email,
-            firstName: userMatch.firstName,
-            lastName: userMatch.lastName,
-            resumUrl: userMatch.resumUrl,
-            avatarUrl: userMatch.avatarUrl,
-            role: userMatch.role
-        }
+        return userMatch;
     }
 /*******    *********** ******** */
     async storeRefreshToken(data: {refreshToken: string, userId: string }) {
@@ -101,14 +94,19 @@ export class AuthService {
             throw new BadRequestException('Email already in use');
         }
         const   hashPassword = await bcrypt.hash(input.password, 10);
-        await this.userService.create({...input, password: hashPassword});
+
+        const   user = await this.userService.create({...input, password: hashPassword});
+        const   {accessToken, refreshToken} = await this.generateTokens(input.email, input.role);
+        await this.storeRefreshToken({ refreshToken: refreshToken, userId: user.id });
+
+        return { accessToken, refreshToken, user: toPublicUser(user) };
     }
 /*******    *********** ******** */
 /*******    *********** ******** */
 /**         REFRESH PART         */
 /*******    *********** ******** */
-    async refresh(refreshPayload: RefreshPayload) {
-        const user = await this.prisma.refreshToken.update({
+    async refresh(refreshPayload: RefreshPayload): Promise<{accessToken: string, refreshToken: string, user: PublicUser}> {
+        const {user} = await this.prisma.refreshToken.update({
             where: { id: refreshPayload.refreshTokenId },
             data: { revoked: true,  },
             select: {
@@ -119,7 +117,8 @@ export class AuthService {
                         firstName: true,
                         lastName: true,
                         role: true,
-                        resumUrl: true
+                        resumeUrl: true,
+                        avatarUrl: true,
                     }
                 }
             }
@@ -130,7 +129,20 @@ export class AuthService {
         return {
             accessToken: accessToken,
             refreshToken: refreshToken,
-            user
+            user: toPublicUser(user)
         }
+    }
+
+    async handleLogout({userId, refreshTokenId}: {userId: string, refreshTokenId: string}) {
+        return await this.prisma.refreshToken.update({
+            where: {
+                userId: userId,
+                id: refreshTokenId
+            },
+            data: {
+                revoked: true
+            }
+        })
+
     }
 }

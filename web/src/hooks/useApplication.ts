@@ -1,7 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "../lib/axios";
 import type { Application } from "@job-platform/contracts";
-import { any } from "zod/v4";
 
 // fetch my application
 export  function useMyApplications() {

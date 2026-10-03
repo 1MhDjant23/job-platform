@@ -68,7 +68,6 @@ export  function AuthProvider({ children } : { children: React.ReactNode }) {
             setUser(null);
             setAccessToken(null);
         }
-        await api.post('/auth/logout');
     }, [])
 
     // Context value
@@ -79,9 +78,7 @@ export  function AuthProvider({ children } : { children: React.ReactNode }) {
     );
     return (
         <AuthContext.Provider value={value}>
-            <h1>Auth Provider</h1>
             {children}
-            <h1>Auth Provider</h1>
         </AuthContext.Provider>
     );
 }

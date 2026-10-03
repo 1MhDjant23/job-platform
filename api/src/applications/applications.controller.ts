@@ -18,6 +18,7 @@ import { Roles } from 'src/common/decorators/roles.decorator';
 import type { CurrentUserPayload } from 'src/common/types/users.types';
 import { ApplicationsService } from './applications.service';
 import { ApplyToJobDto } from './dto/apply.to.job.dto';
+import { Application as PublicApplication, ApiResponse } from '@job-platform/contracts';
 
 @Controller('applications')
 export class ApplicationsController {
@@ -52,11 +53,13 @@ export class ApplicationsController {
     @Post()
     @Roles(Role.JobSeeker)
     @UseGuards(JwtAccessGuard, RolesGuard)
-    apply(
+    async apply(
         @CurrentUser() user: CurrentUserPayload,
         @Body() applyData: ApplyToJobDto
-    ) {
-        
+    ) : Promise<ApiResponse<PublicApplication>> { 
+        return  {
+            data: await this.appService.apply(applyData, user.userId)
+        };
     }    
     /*******    *********** ******** */
     @Delete(':id')
